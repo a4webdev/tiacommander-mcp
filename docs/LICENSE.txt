@@ -1,0 +1,64 @@
+TiaCommander — Proprietary Software License
+
+Copyright (c) 2025-2026 SIA A4 Studio. All rights reserved.
+
+This software and associated documentation files (the "Software") are the
+proprietary property of SIA A4 Studio, registered in the Republic of Latvia.
+
+GRANT OF LICENSE
+
+Subject to a valid license obtained through tiacommander.com, you are granted
+a non-exclusive, non-transferable, revocable license to use the Software on
+the number of machines specified by your license tier.
+
+RESTRICTIONS
+
+You may NOT:
+- Modify, reverse engineer, decompile, or disassemble the Software
+- Redistribute, sublicense, rent, lease, or lend the Software
+- Remove or alter any proprietary notices, labels, or marks
+- Use the Software to develop a competing product
+- Share license keys or circumvent license validation
+
+BETA TERMS
+
+During the beta period, the Software is provided with full functionality at
+no charge. Beta licenses are time-limited and subject to renewal at the
+discretion of SIA A4 Studio. Beta terms may change upon general availability.
+
+TELEMETRY
+
+The Software collects limited telemetry data (tool usage statistics and error
+reports) to improve the product. No PLC program data, project files, or block
+contents are transmitted. See the Data & Privacy section of the documentation
+for details.
+
+DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL SIA A4 STUDIO BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+SIA A4 STUDIO SHALL NOT BE LIABLE FOR ANY DAMAGE TO PLC HARDWARE, SOFTWARE,
+PRODUCTION PROCESSES, OR INDUSTRIAL EQUIPMENT RESULTING FROM THE USE OF THIS
+SOFTWARE. THE USER IS SOLELY RESPONSIBLE FOR VERIFYING ALL OPERATIONS BEFORE
+APPLYING CHANGES TO LIVE INDUSTRIAL SYSTEMS.
+
+GOVERNING LAW
+
+This license shall be governed by and construed in accordance with the laws
+of the Republic of Latvia, without regard to its conflict of law provisions.
+
+CONTACT
+
+SIA A4 Studio
+Republic of Latvia
+https://tiacommander.com
+info@a4.lv

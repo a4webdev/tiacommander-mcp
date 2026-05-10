@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tiacommander": {
+      "command": "C:\\TiaCommander\\TiaCommander.exe",
+      "args": []
+    }
+  }
+}

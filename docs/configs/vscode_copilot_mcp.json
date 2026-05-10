@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "tiacommander": {
+      "type": "stdio",
+      "command": "C:\\TiaCommander\\TiaCommander.exe",
+      "args": []
+    }
+  }
+}

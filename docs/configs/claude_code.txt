@@ -1,0 +1,1 @@
+claude mcp add --transport stdio --scope user tiacommander -- "C:\TiaCommander\TiaCommander.exe"
