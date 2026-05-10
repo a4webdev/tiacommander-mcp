@@ -422,7 +422,7 @@ See the `docs/` folder for detailed installation and setup guides:
 
 TiaCommander is proprietary software published by SIA A4 Studio. During the beta period, the tool is **completely free** with **unlimited usage** and **all tools available** — no restrictions.
 
-In return, we kindly ask you to help us make TiaCommander better. If you encounter a bug, have an idea for a new feature, or just want to share how you use the tool in your workflow — we want to hear from you:
+In return, we count on you to help us make TiaCommander better. If you encounter a bug, have an idea for a new feature, or just want to share how you use the tool in your workflow — we want to hear from you:
 
 - **Bug reports:** [github.com/a4webdev/tiacommander-mcp/issues](https://github.com/a4webdev/tiacommander-mcp/issues)
 - **Feature requests:** [github.com/a4webdev/tiacommander-mcp/issues](https://github.com/a4webdev/tiacommander-mcp/issues)

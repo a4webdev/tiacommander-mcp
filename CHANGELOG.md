@@ -2,6 +2,19 @@
 
 All notable changes to TiaCommander are documented here.
 
+## v2.14.1 (10-05-2026)
+- Fixed user identity displaying username instead of real name in community form
+- Fixed testimonial submissions not linking to user account
+- Machine ID now captured in bug and feature request submissions
+- TIA Portal version dropdown expanded to all Openness-supported versions (V14 SP1 through V21 plus Other)
+- Links in README help page now open in external browser
+- Increased submission rate limit for licensed users
+- Community page cosmetic fixes (textarea resize, dropdown arrow, headings, footer cleanup)
+
+## v2.14.0 (10-05-2026)
+- Community form: licensed users are automatically identified when using the GitHub tab in Manager
+- Removed telemetry timer message from terminal output
+
 ## v2.13.3 (10-05-2026)
 - Fixed terminal input bar right-edge alignment with scrollbar
 - Fixed prompt chevron vertical alignment with cursor
