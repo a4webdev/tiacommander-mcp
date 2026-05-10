@@ -2,8 +2,10 @@ TiaCommander — Proprietary Software License
 
 Copyright (c) 2025-2026 SIA A4 Studio. All rights reserved.
 
+TiaCommander™ is a trademark of SIA A4 Studio.
+
 This software and associated documentation files (the "Software") are the
-proprietary property of SIA A4 Studio, registered in the Republic of Latvia.
+proprietary property of SIA A4 Studio.
 
 GRANT OF LICENSE
 
