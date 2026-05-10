@@ -53,12 +53,13 @@ APPLYING CHANGES TO LIVE INDUSTRIAL SYSTEMS.
 
 GOVERNING LAW
 
-This license shall be governed by and construed in accordance with the laws
-of the Republic of Latvia, without regard to its conflict of law provisions.
+This license shall be governed by and construed in accordance with the
+applicable laws of the European Union and the Republic of Latvia, without
+regard to conflict of law provisions. Any disputes arising under this license
+shall be subject to the exclusive jurisdiction of the courts of Latvia.
 
 CONTACT
 
 SIA A4 Studio
-Republic of Latvia
 https://tiacommander.com
-info@a4.lv
+info@tiacommander.com
