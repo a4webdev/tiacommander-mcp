@@ -3,13 +3,11 @@
 All notable changes to TiaCommander are documented here.
 
 ## v2.14.1 (10-05-2026)
-- Fixed user identity displaying username instead of real name in community form
-- Fixed testimonial submissions not linking to user account
-- Machine ID now captured in bug and feature request submissions
+- Fixed user identity display in community form
 - TIA Portal version dropdown expanded to all Openness-supported versions (V14 SP1 through V21 plus Other)
 - Links in README help page now open in external browser
-- Increased submission rate limit for licensed users
-- Community page cosmetic fixes (textarea resize, dropdown arrow, headings, footer cleanup)
+- Improved submission experience for licensed users
+- Community page cosmetic fixes
 
 ## v2.14.0 (10-05-2026)
 - Community form: licensed users are automatically identified when using the GitHub tab in Manager
@@ -49,8 +47,8 @@ All notable changes to TiaCommander are documented here.
 - Manager window always visible on launch
 
 ## v2.9.0 (06-05-2026)
-- Binary protection: 11-layer obfuscation with NecroBit virtualization
-- Local database encryption: AES-256-CBC on sensitive license fields
+- Binary protection with multi-layer obfuscation
+- Enhanced local data security
 
 ## v2.8.4 (04-05-2026)
 - Resend License Key button for registration recovery
@@ -63,20 +61,19 @@ All notable changes to TiaCommander are documented here.
 - Updated all branding, assembly info, and deployment paths
 
 ## v2.8.1 (29-04-2026)
-- Telemetry validation fixes (JSON key alignment, aggregation query fixes)
+- Telemetry reporting fixes
 
 ## v2.8.0 (28-04-2026)
-- Telemetry reporting with server-controlled intervals
-- Automatic telemetry on startup
-- Data retention management (90-day purge)
+- Telemetry reporting for product improvement
+- Data retention management
 
 ## v2.7.3 (27-04-2026)
 - MCP Config tab: server entry snippet with copy button for supported AI clients
 
 ## v2.7.2 (27-04-2026)
-- License API improvements: failure reason codes, account status checks
+- License validation improvements with clear error messages
 - Beta auto-renewal (30-day rolling)
-- Startup auto-validation with offline grace period fallback
+- Offline grace period for intermittent connectivity
 
 ## v2.7.0 (25-04-2026)
 - TiaCommander Manager GUI with Help and GitHub tabs
@@ -101,8 +98,8 @@ All notable changes to TiaCommander are documented here.
 - Zero dependency on external file system tools
 
 ## v2.3.0 (22-04-2026)
-- Local product database (SQLite) for usage analytics
-- `admin` meta-tool: call statistics, device profiles, error log, version info, system info
+- Usage analytics for product improvement
+- `admin` meta-tool: call statistics, device profiles, version info, system info
 
 ## v2.2.0 (22-04-2026)
 - `alarm_text` meta-tool with 14 actions
@@ -115,8 +112,8 @@ All notable changes to TiaCommander are documented here.
 - DB member management (add, delete, update with access flags)
 
 ## v2.0.0 (21-04-2026)
-- Meta-tool architecture: 47 flat tools consolidated into 9 domain-grouped meta-tools
-- Action discriminator pattern for scalable tool surface
+- Meta-tool architecture: consolidated into 9 domain-grouped meta-tools
+- Improved scalability and AI client compatibility
 
 ## v1.13 (18-04-2026)
 - LAD/FBD block creation with 69 verified instruction types
