@@ -5,8 +5,10 @@
 | **Version** | 2.25.0 |
 | **Protocol** | MCP 2024-11-05 (stdio) |
 | **Runtime** | .NET Framework 4.8 |
-| **TIA Portal** | V15.1 – V21 (Openness API, tested on V19) |
+| **TIA Portal** | V15.1 – V21* (Openness API, tested on V19) |
 | **License** | Proprietary (free beta) |
+
+*\*V15.1–V18 and V20–V21 are expected to work as TIA Portal maintains backward-compatible Openness APIs across versions, but have not been tested. Only V19 is fully tested.*
 
 ---
 
@@ -114,7 +116,7 @@ TiaCommander MCP Server
     │
     │  Siemens Openness API
     ▼
-TIA Portal  (V15.1 – V21, tested on V19)
+TIA Portal  (V15.1 – V21*, tested on V19)
     │
     ▼
 S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
@@ -442,7 +444,7 @@ Have a feature idea? [Submit it on GitHub](https://github.com/a4webdev/tiacomman
 
 ## Quick Start
 
-See the **[Quick Start Guide](1-QUICKSTART.md)** — everything you need to get up and running in 5 minutes: extract, Openness group setup, AI client configuration for all 7 tested clients, license activation, and first commands.
+See the **[Quick Start Guide](docs/1-QUICKSTART.md)** — everything you need to get up and running in 5 minutes: extract, Openness group setup, AI client configuration for all 7 tested clients, license activation, and first commands.
 
 <!-- TODO #132: Add YouTube installation video link here -->
 
