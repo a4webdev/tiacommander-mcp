@@ -2,11 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 2.13.3 |
+| **Version** | 2.25.0 |
 | **Protocol** | MCP 2024-11-05 (stdio) |
 | **Runtime** | .NET Framework 4.8 |
-| **TIA Portal** | V15.1 – V21 (Openness API) |
-| **Publisher** | SIA A4 Studio |
+| **TIA Portal** | V15.1 – V21 (Openness API, tested on V19) |
 | **License** | Proprietary (free beta) |
 
 ---
@@ -17,14 +16,14 @@ TiaCommander is an MCP server that connects AI assistants to Siemens TIA Portal 
 
 **Tested AI clients:** Claude Desktop, Claude Code, VS Code (Copilot), Cursor, Windsurf, Codex CLI, Gemini CLI.
 
-**16 tools, 153 actions** covering the full TIA Portal project lifecycle.
+**16 tools, 166 actions** covering the full TIA Portal project lifecycle.
 
 ---
 
 ## What's in the download?
 
 ```
-TiaCommander-v2.13.3-portable/
+TiaCommander-v2.25.0-portable/
 ├── docs/
 │   ├── configs/
 │   │   ├── claude_code.txt
@@ -36,10 +35,15 @@ TiaCommander-v2.13.3-portable/
 │   │   ├── vscode_copilot_mcp.json
 │   │   └── windsurf_mcp_config.json
 │   ├── 1-QUICKSTART.md
-│   ├── 2-OPENNESS_GROUP.md
-│   ├── 3-AI_CLIENT_SETUP.md
+│   ├── KNOWN_LIMITATIONS.md
 │   ├── LICENSE.txt
 │   └── README.md
+├── data/
+│   └── exports/                       ← Export output folders
+│       ├── alarm_text/
+│       ├── hardware/
+│       ├── tag/
+│       └── watch/
 ├── help/
 │   ├── github-offline.html
 │   └── readme-offline.html
@@ -47,7 +51,7 @@ TiaCommander-v2.13.3-portable/
 │   ├── logoBlack.png
 │   └── tiacommander.png
 ├── runtimes/                          ← WebView2 native loaders
-├── Templates/                         ← Block XML templates (FB, FC, OB, DB)
+├── Templates/                         ← Block XML + alarm templates
 ├── x64/                               ← SQLite native library (64-bit)
 ├── x86/                               ← SQLite native library (32-bit)
 ├── CHANGELOG.md
@@ -77,7 +81,7 @@ TiaCommander-v2.13.3-portable/
 └── TiaCommander.exe.config
 ```
 
-No installer, no registry changes, no system modifications. Extract, configure, and run.
+No installer, no registry changes, no system modifications. Extract, configure, and run. Download the latest `.zip` from [GitHub Releases](https://github.com/a4webdev/tiacommander-mcp/releases).
 
 ---
 
@@ -106,11 +110,11 @@ AI Clients
     │  JSON-RPC 2.0 · stdio
     ▼
 TiaCommander MCP Server
-  16 tools · 153 actions · standalone I/O · .NET Framework 4.8
+  16 tools · 166 actions · standalone I/O · .NET Framework 4.8
     │
     │  Siemens Openness API
     ▼
-TIA Portal  (V15.1 – V21)
+TIA Portal  (V15.1 – V21, tested on V19)
     │
     ▼
 S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
@@ -124,7 +128,7 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 |---|---|---|
 | **`open_manager`** | — | **Launch Manager GUI for registration, license, configuration** |
 | **`get_info`** | — | **Server version, tool count, license status** |
-| **`session`** | **13** | **Entry point — connect to TIA Portal, manage projects** |
+| **`session`** | **15** | **Entry point — connect to TIA Portal, manage projects** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`connect` | | Attach to running TIA Portal (withUI=true by default) |
 | &nbsp;&nbsp;&nbsp;&nbsp;`launch` | | Start new TIA Portal instance (withUI=true by default) |
 | &nbsp;&nbsp;&nbsp;&nbsp;`disconnect` | | Release handle, optionally close TIA |
@@ -140,6 +144,8 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`save_as` | | Save under new name/location |
 | &nbsp;&nbsp;&nbsp;&nbsp;`archive` | | Export .zap19 archive |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `archivationMode` | | None / Compressed / DiscardRestorableData |
+| &nbsp;&nbsp;&nbsp;&nbsp;`configure` | | Set default paths (projects, archives, exports, libraries) |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_archives` | | List .zap* archives from configured root |
 | **`blocks_read`** | **14** | **Inspect, compile, export blocks** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`list` | | List all blocks with type/number/language |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `typeFilter` | | all / code / OB / FB / FC / DB / GlobalDB / InstanceDB |
@@ -191,7 +197,7 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`delete_member` | | Remove member from global DB (bulk: memberNames[]) |
 | &nbsp;&nbsp;&nbsp;&nbsp;`update_member` | | Update member type, start value, comment, access flags |
 | &nbsp;&nbsp;&nbsp;&nbsp;`update_member_comment` | | Update member comment only |
-| **`tag`** | **11** | **Tag tables, tags, assignment list** |
+| **`tag`** | **12** | **Tag tables, tags, assignment list** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`list_tables` | | List all tag tables |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_table_details` | | Tags in a table with addresses/types |
 | &nbsp;&nbsp;&nbsp;&nbsp;`search` | | Search tags by name (partial match) |
@@ -208,6 +214,7 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`find_next_free` | | Next free address with alignment (Bool/Byte/Word/DWord) |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode=declared` | | Skip all declared tag addresses (default, safest) |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode=used` | | Skip only code-referenced addresses |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_tag_table_data` | | Export tag table to CSV or XLSX |
 | **`udt`** | **10** | **User-defined type operations** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`list` | | List all UDTs |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_structure` | | UDT member structure |
@@ -219,7 +226,7 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`update_member_comment` | | Update member comment |
 | &nbsp;&nbsp;&nbsp;&nbsp;`export_xml` | | Export UDT to XML (file or inline) |
 | &nbsp;&nbsp;&nbsp;&nbsp;`import_xml` | | Import UDT from XML (filePath / xmlContent / exportId) |
-| **`watch`** | **11** | **Watch and force table debugging** |
+| **`watch`** | **13** | **Watch and force table debugging** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`list_tables` | | List all watch + force tables |
 | &nbsp;&nbsp;&nbsp;&nbsp;`create_table` | | Create watch table |
 | &nbsp;&nbsp;&nbsp;&nbsp;`delete_table` | | Delete watch table |
@@ -231,7 +238,9 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`update_entry` | | Update entry fields |
 | &nbsp;&nbsp;&nbsp;&nbsp;`delete_entry` | | Remove entry by address |
 | &nbsp;&nbsp;&nbsp;&nbsp;`export_table` | | Export to XML (file or inline) |
-| **`hardware`** | **9** | **Hardware config, network, I/O** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_watch_data` | | Export watch table to CSV or XLSX |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_force_data` | | Export force table to CSV or XLSX |
+| **`hardware`** | **12** | **Hardware config, network, I/O** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_device` | | Single device configuration |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_rack_slot_details` | | Rack/slot topology + I/O assignments |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_full_config` | | All devices configuration |
@@ -241,6 +250,9 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`compile_all` | | Compile all HW |
 | &nbsp;&nbsp;&nbsp;&nbsp;`export_csv` | | Device list to CSV |
 | &nbsp;&nbsp;&nbsp;&nbsp;`export_xlsx` | | Device list to Excel |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_io_map` | | Full device I/O map (rack/slot + tags) to CSV or XLSX |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_hardware_map` | | Raw CAx/AML hardware data to CSV or XLSX |
+| &nbsp;&nbsp;&nbsp;&nbsp;`set_network_config` | | Set IP, subnet, PROFINET name, station name |
 | **`library`** | **26** | **Library types, master copies, lifecycle** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`list_libraries` | | List project + open global libraries |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_info` | | Library details + counts |
@@ -286,7 +298,7 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`find_unused` | | All blocks not called from any OB chain |
 | &nbsp;&nbsp;&nbsp;&nbsp;`find_callers` | | Which blocks call/reference a target block |
 | &nbsp;&nbsp;&nbsp;&nbsp;`find_orphaned_instance_dbs` | | Instance DBs whose owning FB is missing |
-| **`alarm_text`** | **14** | **PLC alarm text lists, entries, alarm classes** |
+| **`alarm_text`** | **15** | **PLC alarm text lists, entries, alarm classes** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`list_textlists` | | List system + user text lists |
 | &nbsp;&nbsp;&nbsp;&nbsp;`create_textlist` | | Create text list (optionally with entries) |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `listRange` | | Decimal (default) / Binary / Bit |
@@ -302,7 +314,8 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`import_textlists` | | Import text lists from XLSX |
 | &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_classes` | | Export alarm class definitions |
 | &nbsp;&nbsp;&nbsp;&nbsp;`import_alarm_classes` | | Import alarm class definitions |
-| **`admin`** | **10** | **Server administration, usage analytics, export storage** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_data` | | Export alarm data to CSV or XLSX (scope: texts/lists/classes) |
+| **`admin`** | **11** | **Server administration, usage analytics, export storage** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_stats` | | Call statistics per tool+action (counts, errors, avg duration) |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_recent_errors` | | Last N failed calls with device/firmware context |
 | &nbsp;&nbsp;&nbsp;&nbsp;`get_device_profiles` | | All unique devices seen (order number, firmware, TIA version) |
@@ -314,6 +327,7 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`delete_export` | | Delete single export |
 | &nbsp;&nbsp;&nbsp;&nbsp;`clear_exports` | | Delete expired exports |
 | &nbsp;&nbsp;&nbsp;&nbsp;`save_export` | | Save export to file (auto-decodes base64 for XLSX) |
+| &nbsp;&nbsp;&nbsp;&nbsp;`open_file` | | Open exported file with default Windows application |
 | **`diagnostics`** | **6** | **Runtime PLC state, network scan, connection config, compare** |
 | &nbsp;&nbsp;&nbsp;&nbsp;`scan_devices` | | Network scan — discover accessible PLCs |
 | &nbsp;&nbsp;&nbsp;&nbsp;`configure_connection` | | Set up download connection programmatically |
@@ -329,7 +343,7 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 | &nbsp;&nbsp;&nbsp;&nbsp;`upload_check` | | Enumerate upload connection options |
 | &nbsp;&nbsp;&nbsp;&nbsp;`upload_station` | | Upload PLC station into project (requires confirm) |
 
-**Total: 16 tools (14 meta-tools + 2 standalone), 153 actions**
+**Total: 16 tools (14 meta-tools + 2 standalone), 166 actions**
 
 Each meta-tool groups related actions behind a single `action` parameter. `get_info` and `open_manager` are standalone utilities that work without a license. Start with `session` to connect, then use any other tool.
 
@@ -337,13 +351,18 @@ Each meta-tool groups related actions behind a single `action` parameter. `get_i
 
 ## Tested Hardware
 
-TiaCommander should work with any PLC supported by TIA Portal and the Openness API. However, we have tested the following devices in-house:
+TiaCommander should work with any PLC supported by TIA Portal and the Openness API. The following devices have been tested in-house with full tool coverage (HAT — human acceptance testing):
 
 | Device | Order Number | Firmware | TIA Portal |
 |---|---|---|---|
+| S7-1200 CPU 1212C DC/DC/Rly | 6ES7 212-1BE31-0XB0 | V3.0 | V19 |
 | S7-1200 CPU 1214C DC/DC/DC | 6ES7 214-1AG31-0XB0 | V3.0 | V19 |
+| S7-1200 CPU 1214C DC/DC/DC | 6ES7 214-1HG40-0XB0 | V4.5 | V19 |
+| S7-1200 CPU 1215C DC/DC/DC | 6ES7 215-1AG31-0XB0 | V3.0 | V19 |
+| S7-1200 CPU 1215C DC/DC/Rly | 6ES7 215-1BG31-0XB0 | V3.0 | V19 |
+| S7-1200 CPU 1217C DC/DC/DC | 6ES7 217-1AG40-0XB0 | V4.2 | V19 |
 
-This list will grow as we collect telemetry data from users and expand our in-house testing across more device families and firmware versions.
+This list will grow as we collect telemetry data from users and expand testing across more device families, firmware versions, and TIA Portal editions.
 
 ---
 
@@ -407,14 +426,27 @@ Your personal information (name, surname, email) provided during registration is
 
 ---
 
+## What's Next
+
+TiaCommander is actively developed. Here's what we're working on:
+
+- **HMI integration** — Openness API access to HMI screens, tags, and alarm views
+- **Runtime monitoring** — live PLC data via Web API and OPC UA (S7-1200 V4.4+, S7-1500)
+- **TIA Portal V20 support** — updated Openness DLLs and new API features
+- **PLCSIM Advanced** — simulation control for offline development and testing
+- **S7-1500 expanded testing** — broader device family coverage with telemetry-driven validation
+
+Have a feature idea? [Submit it on GitHub](https://github.com/a4webdev/tiacommander-mcp/issues).
+
+---
+
 ## Quick Start
 
-See the `docs/` folder for detailed installation and setup guides:
+See the **[Quick Start Guide](1-QUICKSTART.md)** — everything you need to get up and running in 5 minutes: extract, Openness group setup, AI client configuration for all 7 tested clients, license activation, and first commands.
 
-1. **1-QUICKSTART.md** — 5-step install guide (extract, groups, configure, activate, go)
-2. **2-OPENNESS_GROUP.md** — Siemens TIA Openness and TIA Engineer group setup
-3. **3-AI_CLIENT_SETUP.md** — Configuration for all 7 tested AI clients
-4. **configs/** — Ready-to-use config files for each AI client
+<!-- TODO #132: Add YouTube installation video link here -->
+
+Ready-to-use config files for each AI client are in the `configs/` folder.
 
 ---
 
@@ -431,3 +463,9 @@ In return, we count on you to help us make TiaCommander better. If you encounter
 Every report, every suggestion, every comment helps us build a better tool for the Siemens automation community.
 
 See `LICENSE.txt` for full terms. Visit [tiacommander.com](https://tiacommander.com) for more information.
+
+---
+
+## Trademarks
+
+TiaCommander™ is a trademark of SIA A4 Studio. Siemens, TIA Portal, SIMATIC, S7-1200, S7-1500 are trademarks of Siemens AG. TiaCommander is not affiliated with, endorsed by, or sponsored by Siemens AG.
