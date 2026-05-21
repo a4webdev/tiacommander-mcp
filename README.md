@@ -353,7 +353,7 @@ Each meta-tool groups related actions behind a single `action` parameter. `get_i
 
 ## Tested Hardware
 
-TiaCommander should work with any PLC supported by TIA Portal and the Openness API. The following devices have been tested in-house with full tool coverage (HAT — human acceptance testing):
+TiaCommander should work with any PLC supported by TIA Portal and the Openness API. The following devices have been tested in-house with full tool coverage:
 
 | Device | Order Number | Firmware | TIA Portal |
 |---|---|---|---|
