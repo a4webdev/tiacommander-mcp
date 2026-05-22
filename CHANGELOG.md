@@ -2,6 +2,27 @@
 
 All notable changes to TiaCommander are documented here.
 
+## v2.25.5 (22-05-2026)
+- New: User Guide (`docs/USER_GUIDE.md`) -- covers Manager commands, auto-update workflow, and general usage
+- Updated CHANGELOG for v2.25.1-v2.25.4
+
+## v2.25.4 (22-05-2026)
+- Fixed: self-update no longer aborts when the AI assistant keeps a headless MCP server process running — the updater now force-kills remaining processes after a 10-second grace period instead of aborting
+- Improved: update confirmation prompt now shows numbered steps explaining what will happen (download, close, replace, reopen, restart AI assistant)
+- Self-update pipeline tested end-to-end: v2.25.1 → v2.25.4 via GitHub Releases
+
+## v2.25.3 (22-05-2026)
+- Improved: update confirmation prompt lists step-by-step actions before proceeding
+
+## v2.25.2 (22-05-2026)
+- First published GitHub Release with portable ZIP asset (self-update download target)
+- Public repository (`a4webdev/tiacommander-mcp`) enabled for unauthenticated asset downloads
+
+## v2.25.1 (22-05-2026)
+- Security: telemetry POST now includes `license_key` for server-side validation (required by backend security audit)
+- Defensive: GitHub releases GET endpoint handles HTTP 429 (rate limit) gracefully instead of showing an error
+- Version bump for CI4 backend security hardening compatibility
+
 ## v2.25.0 (17-05-2026)
 - Unified export filename convention: all exports now use `{ProjectName}_{PLCName}_{ExportType}_{timestamp}.{ext}`
 - Tag, watch, force, and alarm exports automatically generate descriptive filenames when no output path is specified
