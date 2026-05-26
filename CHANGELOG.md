@@ -2,6 +2,11 @@
 
 All notable changes to TiaCommander are documented here.
 
+## v2.26.1 (26-05-2026)
+- Fixed: `open_manager` failing on fresh downloads with "The operation was canceled by the user" — Windows SmartScreen blocks shell-executed processes from internet-downloaded EXEs in headless mode
+- Fixed: SQLite database file leaking into release ZIP
+- Fixed: release notes encoding for non-ASCII characters (em dashes)
+
 ## v2.26.0 (26-05-2026)
 - **Breaking:** Siemens Openness DLLs (`Siemens.Engineering.dll`, `Siemens.Engineering.Hmi.dll`) are no longer included in the download. TiaCommander now loads them directly from your TIA Portal installation at runtime.
 - **Requirement:** TIA Portal V15.1 or later must be installed on your machine. TiaCommander will not start without it.
