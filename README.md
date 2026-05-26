@@ -444,7 +444,7 @@ Have a feature idea? [Submit it on GitHub](https://github.com/a4webdev/tiacomman
 
 ## Quick Start
 
-See the **[Quick Start Guide](docs/1-QUICKSTART.md)** — everything you need to get up and running in 5 minutes: extract, Openness group setup, AI client configuration for all 7 tested clients, license activation, and first commands.
+**[Download the latest release](https://github.com/a4webdev/tiacommander-mcp/releases/latest)** and see the **[Quick Start Guide](docs/1-QUICKSTART.md)** — everything you need to get up and running in 5 minutes: extract, Openness group setup, AI client configuration for all 7 tested clients, license activation, and first commands.
 
 <!-- TODO #132: Add YouTube installation video link here -->
 
