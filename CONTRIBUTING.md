@@ -28,6 +28,16 @@ describing the problem you're solving and your proposed solution.
 Use the built-in feedback form in TiaCommander Manager, or reach out at
 **info@tiacommander.com**.
 
+## Beta Tester Program — Lifetime License
+
+We are looking for experienced Siemens engineers willing to **test TiaCommander extensively** across real-world projects and provide detailed feedback — bug reports, workflow friction, feature gaps, edge cases.
+
+**What you get:** a **lifetime TiaCommander Pro license** (unlimited usage, all features, all future updates) and a spot on the **Contributors Board** on tiacommander.com.
+
+**What we need:** regular testing on your TIA Portal projects, honest feedback, and willingness to try new releases as they ship. No code contribution required — just use the tool in your daily work and tell us what breaks or what's missing.
+
+**Limited seats available.** If you're interested, reach out at **info@tiacommander.com** with a brief intro: your name, what you work on (industry, PLC types, project scale), and which AI client you use.
+
 ## Future Opportunities
 
 We are building a team around TiaCommander and the broader vision of
