@@ -369,6 +369,17 @@ Register with your name, surname, and email to get a free beta license key. Acti
 
 ![TiaCommander Manager activation](https://tiacommander.com/img/github/1-Quickstart/quickstart_manager_activations_ss23.png)
 
+#### Important: restart after activation (one-time setup)
+
+Before activation, TiaCommander runs with only 2 tools (`get_info` and `open_manager`). After activating your license, you must restart your AI client so it reconnects and loads all 16 tools:
+
+1. In the TiaCommander terminal window, type `stop` and press Enter to shut down the MCP server process
+2. Open Task Manager (Ctrl+Alt+Delete → Task Manager)
+3. Find your AI client process (e.g. Claude, Cursor, Code) and click **End Task**
+4. Relaunch your AI client
+
+After restart, your AI assistant will have access to all 16 tools. This is a **one-time setup** — subsequent launches will load all tools automatically.
+
 Then configure the default project and archives root for your TIA Portal projects. This allows you to keep everything organised as you are used to and use TiaCommander in the same directory. You can always explicitly set a different path in the MCP Tab or just tell your AI assistant to create a project or archive in a different root.
 
 ![TiaCommander Manager MCP configuration tab](https://tiacommander.com/img/github/1-Quickstart/quickstart_manager_mcpTab_ss24.png)
