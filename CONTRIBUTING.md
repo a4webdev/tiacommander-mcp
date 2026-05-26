@@ -35,7 +35,7 @@ AI-powered industrial automation. If you have experience in:
 
 - **Siemens PLC programming** (TIA Portal, S7-1200/1500, SCL, LAD, FBD)
 - **Industrial automation protocols** (OPC UA, S7Comm, Modbus, PROFINET)
-- **.NET / VB.NET development**
+- **C# / .NET development**
 - **MCP (Model Context Protocol) server development**
 
 ...and you are interested in contributing or joining the team, we would love
