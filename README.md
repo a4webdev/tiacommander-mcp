@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Version** | 2.25.0 |
+| **Version** | 2.26.0 |
 | **Protocol** | MCP 2024-11-05 (stdio) |
 | **Runtime** | .NET Framework 4.8 |
 | **TIA Portal** | V15.1 – V21* (Openness API, tested on V19) |
@@ -25,7 +25,7 @@ TiaCommander is an MCP server that connects AI assistants to Siemens TIA Portal 
 ## What's in the download?
 
 ```
-TiaCommander-v2.25.0-portable/
+TiaCommander-v2.26.0-portable/
 ├── docs/
 │   ├── configs/
 │   │   ├── claude_code.txt
@@ -66,8 +66,6 @@ TiaCommander-v2.25.0-portable/
 ├── Microsoft.Web.WebView2.WinForms.dll
 ├── QUICKSTART.md
 ├── README.md
-├── Siemens.Engineering.dll
-├── Siemens.Engineering.Hmi.dll
 ├── System.Buffers.dll
 ├── System.ComponentModel.Annotations.dll
 ├── System.Data.SQLite.dll
@@ -84,6 +82,8 @@ TiaCommander-v2.25.0-portable/
 ```
 
 No installer, no registry changes, no system modifications. Extract, configure, and run. Download the latest `.zip` from [GitHub Releases](https://github.com/a4webdev/tiacommander-mcp/releases).
+
+> **Prerequisite:** [Siemens TIA Portal](https://www.siemens.com/tia-portal) V15.1 or later must be installed on your machine. TiaCommander loads Siemens Openness libraries directly from your TIA Portal installation at runtime — it **will not start** without TIA Portal.
 
 ---
 
@@ -444,8 +444,7 @@ Have a feature idea? [Submit it on GitHub](https://github.com/a4webdev/tiacomman
 
 ## Quick Start
 
-1. **[Download](https://github.com/a4webdev/tiacommander-mcp/releases/latest)** the latest portable `.zip` from GitHub Releases
-2. Extract and follow the **[Quick Start Guide](docs/1-QUICKSTART.md)** — everything you need to get up and running in 5 minutes: extract, Openness group setup, AI client configuration for all 7 tested clients, license activation, and first commands.
+See the **[Quick Start Guide](docs/1-QUICKSTART.md)** — everything you need to get up and running in 5 minutes: extract, Openness group setup, AI client configuration for all 7 tested clients, license activation, and first commands.
 
 <!-- TODO #132: Add YouTube installation video link here -->
 

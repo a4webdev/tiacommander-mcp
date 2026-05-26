@@ -2,6 +2,14 @@
 
 All notable changes to TiaCommander are documented here.
 
+## v2.26.0 (26-05-2026)
+- **Breaking:** Siemens Openness DLLs (`Siemens.Engineering.dll`, `Siemens.Engineering.Hmi.dll`) are no longer included in the download. TiaCommander now loads them directly from your TIA Portal installation at runtime.
+- **Requirement:** TIA Portal V15.1 or later must be installed on your machine. TiaCommander will not start without it.
+- New: runtime assembly resolver automatically discovers your TIA Portal installation via Windows registry, with filesystem fallback
+- New: startup log shows which TIA Portal installation was found and how it was discovered
+- Improved: release security gate now checks for accidental inclusion of proprietary DLLs
+- Retracted download assets from v2.14.1, v2.25.0, v2.25.5 — these releases contained proprietary Siemens DLLs that should not have been redistributed
+
 ## v2.25.5 (22-05-2026)
 - New: User Guide (`docs/USER_GUIDE.md`) -- covers Manager commands, auto-update workflow, and general usage
 - Updated CHANGELOG for v2.25.1-v2.25.4
@@ -19,9 +27,8 @@ All notable changes to TiaCommander are documented here.
 - Public repository (`a4webdev/tiacommander-mcp`) enabled for unauthenticated asset downloads
 
 ## v2.25.1 (22-05-2026)
-- Security: telemetry POST now includes `license_key` for server-side validation (required by backend security audit)
-- Defensive: GitHub releases GET endpoint handles HTTP 429 (rate limit) gracefully instead of showing an error
-- Version bump for CI4 backend security hardening compatibility
+- Security: telemetry data is now cryptographically bound to your license key
+- Improved: update check handles server rate limiting gracefully
 
 ## v2.25.0 (17-05-2026)
 - Unified export filename convention: all exports now use `{ProjectName}_{PLCName}_{ExportType}_{timestamp}.{ext}`

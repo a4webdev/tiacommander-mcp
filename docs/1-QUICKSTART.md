@@ -2,7 +2,19 @@
 
 Get up and running in 5 minutes.
 
-## 1. Extract
+## Prerequisites
+
+> - **Siemens TIA Portal V15.1 or later** (Professional edition) — must be installed on your machine
+> - Openness API enabled during TIA Portal installation
+> - Windows 10/11 (64-bit)
+>
+> TiaCommander loads Siemens Openness libraries directly from your TIA Portal installation at runtime. It **will not start** without TIA Portal.
+
+## 1. Download
+
+Grab the latest portable `.zip` from [GitHub Releases](https://github.com/a4webdev/tiacommander-mcp/releases/latest).
+
+## 2. Extract
 
 Extract the ZIP to a permanent location. Recommended location:
 
@@ -12,7 +24,7 @@ C:\TiaCommander\
 
 You should see `TiaCommander.exe` alongside the runtime DLLs.
 
-## 2. TIA Portal Openness group
+## 3. TIA Portal Openness group
 
 Your Windows user must be a member of the **Siemens TIA Openness** and **Siemens TIA Engineer** groups.
 Without this, TIA Portal will refuse external connections. 
@@ -81,7 +93,7 @@ You should see something like this:
 
 If the "Siemens TIA Openness" group doesn't exist on your machine, TIA Portal may not be installed, or the Openness API component was not selected during installation. Reinstall TIA Portal and ensure the **Openness** option is checked.
 
-## 3. Configure your AI client
+## 4. Configure your AI client
 
 Add TiaCommander to your AI client's MCP configuration.
 
@@ -334,7 +346,7 @@ If you find that your favorite AI assistant does not work with TiaCommander, ple
 
 </details>
 
-## 4. Restart your AI client
+## 5. Restart your AI client
 
 Close and reopen your AI client (e.g. quit Claude Desktop from the tray icon, then relaunch).
 TiaCommander starts automatically when the AI client connects.
@@ -343,7 +355,7 @@ TiaCommander starts automatically when the AI client connects.
 
 **If quitting from the tray doesn't work:** open Task Manager (Ctrl+Alt+Delete → Task Manager), find your AI client process (e.g. Claude, Cursor, Code), and click End Task. Then relaunch the application.
 
-## 5. Activate your license
+## 6. Activate your license
 
 Ask your AI assistant:
 
@@ -367,7 +379,7 @@ Then configure the default project and archives root for your TIA Portal project
 - `load tools` — trigger tool discovery
 - Check your AI client's documentation for MCP tool activation
 
-## 6. Start working
+## 7. Start working
 
 Ask your AI assistant to launch TIA Portal or connect to an already running instance:
 
@@ -433,6 +445,7 @@ Don't forget to tell us how it goes!
 → Restart the AI client completely (not just close the window — quit from tray). If quitting from the tray doesn't work, use Task Manager (Ctrl+Alt+Delete) to end the process, then relaunch.
 
 **TIA Portal not detected:**
+→ Make sure TIA Portal is installed on your machine. TiaCommander loads Siemens Openness DLLs from your TIA Portal installation at runtime — without TIA Portal, TiaCommander cannot start.
 → Make sure TIA Portal is running with a project open before connecting.
 → Try: "Connect to TIA Portal" in your AI assistant.
 
