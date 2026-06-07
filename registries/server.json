@@ -3,12 +3,12 @@
   "name": "io.github.a4webdev/tiacommander-mcp",
   "title": "TiaCommander",
   "description": "Siemens TIA Portal MCP server — AI-assisted PLC programming. 16 tools, 166 actions.",
-  "version": "2.26.2",
+  "version": "2.26.3",
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/a4webdev/tiacommander-mcp/releases/download/v2.26.2/TiaCommander-v2.26.2-portable.zip",
-      "fileSha256": "44d8c2dfbbdbc0741d8a7643beae8147ac5bd1ad963175e69b7f3486ad0de6fa",
+      "identifier": "https://github.com/a4webdev/tiacommander-mcp/releases/download/v2.26.3/TiaCommander-v2.26.3-portable.zip",
+      "fileSha256": "485fcfb78ebb222ab340ae68615dbcad9a9d620bf69c5daa382c18c956b327e1",
       "transport": {
         "type": "stdio"
       }

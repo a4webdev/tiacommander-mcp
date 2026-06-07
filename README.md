@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Version** | 2.26.2 |
+| **Version** | 2.26.3 |
 | **Protocol** | MCP 2024-11-05 (stdio) |
 | **Runtime** | .NET Framework 4.8 |
 | **TIA Portal** | V15.1 – V21* (Openness API, tested on V19) |
@@ -25,7 +25,7 @@ TiaCommander is an MCP server that connects AI assistants to Siemens TIA Portal 
 ## What's in the download?
 
 ```
-TiaCommander-v2.26.2-portable/
+TiaCommander-v2.26.3-portable/
 ├── docs/
 │   ├── configs/
 │   │   ├── claude_code.txt
