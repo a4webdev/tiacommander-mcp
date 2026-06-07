@@ -19,7 +19,7 @@
     "type": "binary",
     "entry_point": "TiaCommander.exe",
     "mcp_config": {
-      "command": "${__dirname}/TiaCommander.exe"
+      "command": "${__dirname}\\TiaCommander.exe"
     }
   },
   "tools_generated": true,

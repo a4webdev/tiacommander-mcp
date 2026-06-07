@@ -8,7 +8,7 @@
     {
       "registryType": "mcpb",
       "identifier": "https://github.com/a4webdev/tiacommander-mcp/releases/download/v2.26.3/TiaCommander-v2.26.3-portable.zip",
-      "fileSha256": "485fcfb78ebb222ab340ae68615dbcad9a9d620bf69c5daa382c18c956b327e1",
+      "fileSha256": "38dc51cfc0ce5fc464d11e8fa14295fbaf41fc80b3f1711bc514f109601df136",
       "transport": {
         "type": "stdio"
       }
