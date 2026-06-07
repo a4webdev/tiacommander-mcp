@@ -110,6 +110,17 @@ Expand the section for your AI client below:
 <details>
 <summary><strong>Claude Desktop</strong></summary>
 
+#### Option 1: One-click install (recommended)
+
+1. Download `TiaCommander-v2.26.2.mcpb` from [GitHub Releases](https://github.com/a4webdev/tiacommander-mcp/releases/latest)
+2. Open Claude Desktop → **Settings** → **Extensions**
+3. Click **Advanced Settings** → **Install Extension**
+4. Select the downloaded `.mcpb` file → click **Install**
+
+TiaCommander will appear in your Extensions list. No config file editing needed.
+
+#### Option 2: Manual config
+
 **Config file:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json

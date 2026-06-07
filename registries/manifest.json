@@ -1,0 +1,31 @@
+{
+  "manifest_version": "0.3",
+  "name": "tiacommander",
+  "display_name": "TiaCommander",
+  "version": "2.26.2",
+  "description": "MCP server for Siemens TIA Portal. AI-assisted PLC programming. 16 tools, 166 actions.",
+  "long_description": "TiaCommander connects AI assistants to Siemens TIA Portal via the Openness API. Create, read, import, export, and compile PLC blocks (SCL, LAD, FBD, STL). Browse hardware, cross-references, tag tables, and libraries. Manage projects, sessions, and deployments. Tested with Claude Desktop, Claude Code, VS Code, Cursor, Windsurf, Codex CLI, Gemini CLI.",
+  "author": {
+    "name": "SIA A4 Studio",
+    "url": "https://tiacommander.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a4webdev/tiacommander-mcp.git"
+  },
+  "homepage": "https://tiacommander.com",
+  "icon": "icon.png",
+  "server": {
+    "type": "binary",
+    "entry_point": "TiaCommander.exe",
+    "mcp_config": {
+      "command": "${__dirname}/TiaCommander.exe"
+    }
+  },
+  "tools_generated": true,
+  "keywords": ["siemens", "tia-portal", "plc", "industrial-automation", "openness-api", "scl", "lad"],
+  "license": "Proprietary",
+  "compatibility": {
+    "platforms": ["win32"]
+  }
+}

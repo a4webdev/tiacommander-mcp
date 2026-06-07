@@ -83,6 +83,8 @@ TiaCommander-v2.26.1-portable/
 
 No installer, no registry changes, no system modifications. Extract, configure, and run. Download the latest `.zip` from [GitHub Releases](https://github.com/a4webdev/tiacommander-mcp/releases).
 
+**Claude Desktop users:** Download the `.mcpb` bundle from [Releases](https://github.com/a4webdev/tiacommander-mcp/releases/latest) and install via Settings → Extensions → Advanced Settings → Install Extension. No config file editing needed. See the [Quick Start Guide](docs/1-QUICKSTART.md) for details.
+
 > **Prerequisite:** [Siemens TIA Portal](https://www.siemens.com/tia-portal) V15.1 or later must be installed on your machine. TiaCommander loads Siemens Openness libraries directly from your TIA Portal installation at runtime — it **will not start** without TIA Portal.
 
 ---
