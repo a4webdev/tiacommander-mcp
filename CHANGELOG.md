@@ -3,11 +3,9 @@
 All notable changes to TiaCommander are documented here.
 
 ## v2.26.3 (07-06-2026)
-- Fixed: auto-update now preserves manifest.json and icon.png in MCPB extension directory (included in portable ZIP)
-
-## v2.26.2 (07-06-2026)
 - Added: MCPB bundle (.mcpb) in GitHub Releases -- install TiaCommander in Claude Desktop with one click (Settings -> Extensions -> Advanced Settings -> Install Extension)
 - Improved: Manager terminal now shows restart instructions after license activation
+- Fixed: auto-update now preserves manifest.json and icon.png in MCPB extension directory
 
 ## v2.26.1 (26-05-2026)
 - Fixed: `open_manager` failing on fresh downloads with "The operation was canceled by the user" — Windows SmartScreen blocks shell-executed processes from internet-downloaded EXEs in headless mode
