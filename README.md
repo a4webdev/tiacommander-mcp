@@ -1,5 +1,7 @@
 # TiaCommander — MCP Server for Siemens TIA Portal
 
+[![smithery badge](https://smithery.ai/badge/a4webdev/tiacommander)](https://smithery.ai/servers/a4webdev/tiacommander)
+
 | | |
 |---|---|
 | **Version** | 2.26.3 |
