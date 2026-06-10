@@ -1,10 +1,8 @@
 # TiaCommander — MCP Server for Siemens TIA Portal
 
-[![smithery badge](https://smithery.ai/badge/a4webdev/tiacommander)](https://smithery.ai/servers/a4webdev/tiacommander)
-
 | | |
 |---|---|
-| **Version** | 2.26.3 |
+| **Version** | 2.29.0 |
 | **Protocol** | MCP 2024-11-05 (stdio) |
 | **Runtime** | .NET Framework 4.8 |
 | **TIA Portal** | V15.1 – V21* (Openness API, tested on V19) |
@@ -27,7 +25,7 @@ TiaCommander is an MCP server that connects AI assistants to Siemens TIA Portal 
 ## What's in the download?
 
 ```
-TiaCommander-v2.26.3-portable/
+TiaCommander-v2.29.0-portable/
 ├── docs/
 │   ├── configs/
 │   │   ├── claude_code.txt
@@ -87,7 +85,7 @@ No installer, no registry changes, no system modifications. Extract, configure, 
 
 **Claude Desktop users:** Download the `.mcpb` bundle from [Releases](https://github.com/a4webdev/tiacommander-mcp/releases/latest) and install via Settings → Extensions → Advanced Settings → Install Extension. No config file editing needed. See the [Quick Start Guide](docs/1-QUICKSTART.md) for details.
 
-> **Prerequisite:** [Siemens TIA Portal](https://www.siemens.com/tia-portal) V15.1 or later must be installed on your machine. TiaCommander loads Siemens Openness libraries directly from your TIA Portal installation at runtime — it **will not start** without TIA Portal.
+> **Prerequisite:** [Siemens TIA Portal](https://www.siemens.com/tia-portal) V15.1 or later must be installed on your machine with the **Openness** component enabled. TiaCommander loads Siemens Openness libraries directly from your TIA Portal installation at runtime. Without TIA Portal, the server starts in **degraded mode** with limited functionality and guides you through setup.
 
 ---
 

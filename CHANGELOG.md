@@ -2,6 +2,28 @@
 
 All notable changes to TiaCommander are documented here.
 
+## v2.29.0 (10-06-2026)
+- Improved: Degraded mode now distinguishes between "TIA Portal not installed" and "TIA Portal installed but Openness API not enabled", providing tailored setup instructions for each case
+- Improved: Degraded mode detects and displays the installed TIA Portal version (e.g. V19) even when Openness is missing
+- Improved: TiaCommander Manager GUI now launches normally when TIA Portal is not installed (previously blocked with an error dialog), allowing license registration before TIA Portal setup
+- Improved: Restart instructions in degraded mode guide users to use Ctrl+Alt+Delete and Task Manager for a clean restart
+- Added: Telemetry now tracks degraded mode sessions with reason codes for better install-experience analytics
+
+## v2.28.0 (10-06-2026)
+- Added: `hardware action=dump_catalog` — dumps the full TIA Portal hardware catalog (~11,000 entries) to local database. Auto-detects TIA Portal version changes and re-dumps on upgrade
+- Added: `hardware action=search_catalog` — live real-time search of TIA Portal hardware catalog (requires TIA Portal running)
+- Added: `admin action=search_device_catalog` — offline search of locally cached hardware catalog by article number, type name, or description. No TIA Portal required
+- Added: `admin action=reset_device_catalog` — clears local catalog cache and triggers re-dump on next TIA Portal connection
+- Added: Device catalog telemetry — hardware catalog entries are included in telemetry data for aggregated device usage insights
+- Added: Per-project device catalog collection — walks project DeviceItems recursively to catalog all installed hardware modules
+
+## v2.27.0 (10-06-2026)
+- Added: `session action=get_state` — proactive state check returning connection level (0-4), TIA/project/device status, license info, and restart flag. Call at session start for instant situational awareness
+- Added: Graceful state guards across all tools — instead of cryptic exceptions when TIA Portal is not connected or no project is open, tools now return clear guidance on what to do next
+- Added: Restart detection — if your license is activated or changes mid-session, every tool response includes a restart reminder so the AI assistant picks up the new tool set
+- Improved: `session action=info` now includes state level and guidance for non-ready states
+- Improved: Server instructions updated to recommend `get_state` as the first call in every workflow
+
 ## v2.26.3 (07-06-2026)
 - Added: MCPB bundle (.mcpb) in GitHub Releases -- install TiaCommander in Claude Desktop with one click (Settings -> Extensions -> Advanced Settings -> Install Extension)
 - Improved: Manager terminal now shows restart instructions after license activation
