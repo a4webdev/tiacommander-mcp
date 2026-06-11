@@ -2,6 +2,15 @@
 
 All notable changes to TiaCommander are documented here.
 
+## v2.30.3 (11-06-2026)
+- Added: Enriched telemetry — every tool call now tracks which AI client, which PLC device (order number, firmware version), and which session UUID for cross-dimensional error analysis
+- Added: Three-tier error classification — `Exception` (unhandled crash), `SoftError` (Openness API failure caught by wrapper), `Guard` (validation caught bad input before API call, e.g. block/device/tag not found)
+- Added: Individual error rows in telemetry — each failed tool call is sent with full context (tool, action, error type, message, device info, client, session) instead of aggregated counts
+- Added: In-memory device info cache — PLC order number and firmware resolved once per device per session, eliminating repeated Openness API walks
+- Added: Recursive device resolution (2 levels deep) with device_profiles fallback for hardware identification
+- Added: Mandatory version update notification — when a newer version is available, the AI agent is instructed to inform the user with step-by-step update instructions before proceeding with any task
+- Added: Device cross-dimension tracking in telemetry — device usage grouped by AI client for per-client error rate analysis
+
 ## v2.29.0 (10-06-2026)
 - Improved: Degraded mode now distinguishes between "TIA Portal not installed" and "TIA Portal installed but Openness API not enabled", providing tailored setup instructions for each case
 - Improved: Degraded mode detects and displays the installed TIA Portal version (e.g. V19) even when Openness is missing
