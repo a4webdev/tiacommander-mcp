@@ -2,13 +2,16 @@
 
 | | |
 |---|---|
-| **Version** | 2.29.0 |
+| **Version** | 3.15.2 |
 | **Protocol** | MCP 2024-11-05 (stdio) |
 | **Runtime** | .NET Framework 4.8 |
-| **TIA Portal** | V15.1 – V21* (Openness API, tested on V19) |
+| **TIA Portal** | V17 – V20 (Openness API, tested on V19) |
 | **License** | Proprietary (free beta) |
 
-*\*V15.1–V18 and V20–V21 are expected to work as TIA Portal maintains backward-compatible Openness APIs across versions, but have not been tested. Only V19 is fully tested.*
+**New in this release:** live PLC data — read data blocks, tag tables, watch tables and CPU diagnostics live from the running controller; several AI clients served at once from one machine, with optional direct HTTP clients on the local listener; and multi-Portal support — pick which installed TIA Portal (V17–V20) to run on a machine with several installed.
+
+*\*V17 through V20 are supported for project work. V16 and older are detected and refused with a clear message. Only V19 is fully tested; the others are expected to work as TIA Portal maintains backward-compatible Openness APIs across versions.*
+
 
 ---
 
@@ -18,14 +21,27 @@ TiaCommander is an MCP server that connects AI assistants to Siemens TIA Portal 
 
 **Tested AI clients:** Claude Desktop, Claude Code, VS Code (Copilot), Cursor, Windsurf, Codex CLI, Gemini CLI.
 
-**16 tools, 166 actions** covering the full TIA Portal project lifecycle.
+**18 tools, 205 actions** covering the full TIA Portal project lifecycle.
 
 ---
 
 ## What's in the download?
 
 ```
-TiaCommander-v2.29.0-portable/
+TiaCommander-v3.15.2-portable/
+├── bridge/                              ← Live PLC data helper (S7CommPlus / TLS)
+│   ├── libcrypto-3-x64.dll
+│   ├── libssl-3-x64.dll
+│   ├── S7CommPlusDriver.dll
+│   ├── TiaCommander.S7Bridge.exe
+│   ├── TiaCommander.S7Classic.dll
+│   └── zlib.net.dll
+├── data/
+│   └── exports/                         ← Export output folders
+│       ├── alarm_text/
+│       ├── hardware/
+│       ├── tag/
+│       └── watch/
 ├── docs/
 │   ├── configs/
 │   │   ├── claude_code.txt
@@ -39,33 +55,51 @@ TiaCommander-v2.29.0-portable/
 │   ├── 1-QUICKSTART.md
 │   ├── KNOWN_LIMITATIONS.md
 │   ├── LICENSE.txt
-│   └── README.md
-├── data/
-│   └── exports/                       ← Export output folders
-│       ├── alarm_text/
-│       ├── hardware/
-│       ├── tag/
-│       └── watch/
+│   ├── README.md
+│   └── THIRD-PARTY.md
 ├── help/
 │   ├── github-offline.html
 │   └── readme-offline.html
+├── licenses/                            ← Full third-party licence texts
+│   ├── Apache-2.0.txt
+│   ├── BSD-3-Clause.txt
+│   ├── GPL-3.0.txt
+│   ├── LGPL-3.0.txt
+│   ├── Microsoft-WebView2-SDK.txt
+│   ├── MIT.txt
+│   └── Polyform-Noncommercial-1.0.0.txt
 ├── Resources/
 │   ├── logoBlack.png
 │   └── tiacommander.png
-├── runtimes/                          ← WebView2 native loaders
-├── Templates/                         ← Block XML + alarm templates
-├── x64/                               ← SQLite native library (64-bit)
-├── x86/                               ← SQLite native library (32-bit)
+├── runtimes/                            ← WebView2 native loaders
+│   ├── win-x64/native/WebView2Loader.dll
+│   ├── win-x86/native/WebView2Loader.dll
+│   └── win-arm64/native/WebView2Loader.dll
+├── Templates/                           ← Block XML, alarm & diagnostics templates
+│   ├── diagnostics/
+│   │   ├── TC_Diag_1200.xml
+│   │   └── TC_DiagOB.xml
+│   ├── Fb.xml
+│   ├── Fc.xml
+│   ├── GlobalDb.xml
+│   ├── Ob.xml
+│   ├── Ob_FBD.xml
+│   ├── Ob_LAD.xml
+│   ├── Ob_SCL.xml
+│   └── TextListTemplate.xlsx
+├── x64/                                 ← SQLite native library (64-bit)
+│   └── SQLite.Interop.dll
+├── x86/                                 ← SQLite native library (32-bit)
+│   └── SQLite.Interop.dll
 ├── CHANGELOG.md
 ├── EPPlus.dll
 ├── EPPlus.Interfaces.dll
-├── LICENSE.txt
+├── icon.png
+├── manifest.json
 ├── Microsoft.Bcl.AsyncInterfaces.dll
 ├── Microsoft.IO.RecyclableMemoryStream.dll
 ├── Microsoft.Web.WebView2.Core.dll
 ├── Microsoft.Web.WebView2.WinForms.dll
-├── QUICKSTART.md
-├── README.md
 ├── System.Buffers.dll
 ├── System.ComponentModel.Annotations.dll
 ├── System.Data.SQLite.dll
@@ -77,9 +111,11 @@ TiaCommander-v2.29.0-portable/
 ├── System.Text.Encodings.Web.dll
 ├── System.Text.Json.dll
 ├── System.Threading.Tasks.Extensions.dll
-├── TiaCommander.exe                   ← MCP server + Manager GUI
+├── THIRD-PARTY-NOTICES.md
+├── TiaCommander.exe                     ← MCP server + Manager GUI
 └── TiaCommander.exe.config
 ```
+
 
 No installer, no registry changes, no system modifications. Extract, configure, and run. Download the latest `.zip` from [GitHub Releases](https://github.com/a4webdev/tiacommander-mcp/releases).
 
@@ -114,7 +150,7 @@ AI Clients
     │  JSON-RPC 2.0 · stdio
     ▼
 TiaCommander MCP Server
-  16 tools · 166 actions · standalone I/O · .NET Framework 4.8
+  18 tools · 205 actions · standalone I/O · .NET Framework 4.8
     │
     │  Siemens Openness API
     ▼
@@ -130,224 +166,230 @@ S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
 
 | Tool / Action | # | Description |
 |---|---|---|
-| **`open_manager`** | — | **Launch Manager GUI for registration, license, configuration** |
-| **`get_info`** | — | **Server version, tool count, license status** |
-| **`session`** | **15** | **Entry point — connect to TIA Portal, manage projects** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`connect` | | Attach to running TIA Portal (withUI=true by default) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`launch` | | Start new TIA Portal instance (withUI=true by default) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`disconnect` | | Release handle, optionally close TIA |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `closeTia` | | Also terminate TIA Portal process |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `saveChanges` | | prompt / save / discard / auto |
-| &nbsp;&nbsp;&nbsp;&nbsp;`open` | | Open .ap19 project (auto-launch TIA if needed, idempotent) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`close_project` | | Close with save/discard/auto |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_project` | | Current project name, path, version |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_devices` | | Enumerate devices — needed by all other tools |
-| &nbsp;&nbsp;&nbsp;&nbsp;`save` | | Save project |
-| &nbsp;&nbsp;&nbsp;&nbsp;`is_dirty` | | Check unsaved changes |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create` | | Create new project (withUI=true by default) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`save_as` | | Save under new name/location |
-| &nbsp;&nbsp;&nbsp;&nbsp;`archive` | | Export .zap19 archive |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `archivationMode` | | None / Compressed / DiscardRestorableData |
-| &nbsp;&nbsp;&nbsp;&nbsp;`configure` | | Set default paths (projects, archives, exports, libraries) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_archives` | | List .zap* archives from configured root |
-| **`blocks_read`** | **14** | **Inspect, compile, export blocks** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list` | | List all blocks with type/number/language |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `typeFilter` | | all / code / OB / FB / FC / DB / GlobalDB / InstanceDB |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `includeInstanceDbs` | | Expand instance DB roll-up |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_details` | | Block info, size, timestamps |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_interface` | | Full interface structure (In/Out/Static/Temp) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_all_interfaces_summary` | | Summary across all blocks |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_xml_raw` | | Raw XML content inline |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_xml_inline` | | Parsed XML structure inline |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_xml_file` | | Export XML to file or inline (returnInline) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_source` | | Export SCL/STL source |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_all_xml` | | Export all blocks to directory or inline |
-| &nbsp;&nbsp;&nbsp;&nbsp;`compile_block` | | Compile single block |
-| &nbsp;&nbsp;&nbsp;&nbsp;`compile_all` | | Compile all blocks |
-| &nbsp;&nbsp;&nbsp;&nbsp;`check_consistency` | | Block consistency status |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_compiler_messages` | | All compiler messages |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_compiler_errors` | | Errors only |
-| **`blocks_write`** | **15** | **Create, delete, import, modify blocks** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_fb` | | Create function block (number auto-assigned if omitted) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_fc` | | Create function (number auto-assigned if omitted) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_ob` | | Create organization block (number auto-assigned if omitted) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_block` | | Full block creation with interface + logic |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `blockType` | | FB / FC / OB |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `language` | | LAD / SCL / FBD / STL (69 LAD/FBD instruction types) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `memoryLayout` | | Optimized (default) / Standard |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `interface` | | Custom In/Out/InOut/Static/Temp/Constant sections |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `networks[]` | | Multi-network blocks with per-network SCL/title/comment |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_block` | | Delete any block (optional force for orphaned instance DBs) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`import_xml_inline` | | Import block from XML string |
-| &nbsp;&nbsp;&nbsp;&nbsp;`import_xml_file` | | Import block from file or export DB (exportId) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_multi_instance_member` | | Add static member to FB (bulk: members[]) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`remove_multi_instance_member` | | Remove static member from FB |
-| &nbsp;&nbsp;&nbsp;&nbsp;`rename_block` | | Rename block and/or change number |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_network` | | Update network title/comment |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_network_element` | | Surgical edit of Call elements |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `newTarget` | | Retarget to different FB/FC |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `newInstance` | | Swap instance DB |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `pinWires` | | Rewire input/output pins to tags |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_network` | | Insert empty network at position |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_network` | | Remove network by index |
-| &nbsp;&nbsp;&nbsp;&nbsp;`replace_network` | | Replace network title/comment |
-| **`db`** | **9** | **Data block operations** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list` | | List all global and instance DBs |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_structure` | | Full DB structure via XML parse |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create` | | Create new global DB (number auto-assigned if omitted) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_instance_db` | | Create instance DB for an FB |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete` | | Delete data block |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_member` | | Add member to global DB (bulk: members[]) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_member` | | Remove member from global DB (bulk: memberNames[]) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_member` | | Update member type, start value, comment, access flags |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_member_comment` | | Update member comment only |
-| **`tag`** | **12** | **Tag tables, tags, assignment list** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_tables` | | List all tag tables |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_table_details` | | Tags in a table with addresses/types |
-| &nbsp;&nbsp;&nbsp;&nbsp;`search` | | Search tags by name (partial match) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_table` | | Create new tag table |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_table` | | Delete tag table |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_tag` | | Add tag to table (bulk: tags[]) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_tag` | | Remove tag from table (bulk: tagNames[]) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_comment` | | Update tag comment |
-| &nbsp;&nbsp;&nbsp;&nbsp;`set_access` | | Set external access flags (accessible, visible, writable) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_assignment_list` | | Address occupancy for M/I/Q areas + HW I/O |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode=declared` | | All declared tag addresses (default) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode=used` | | Only addresses referenced in block code |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode=conflicts` | | Detect addresses in 2+ blocks (Q=error, M=info, I=hidden) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`find_next_free` | | Next free address with alignment (Bool/Byte/Word/DWord) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode=declared` | | Skip all declared tag addresses (default, safest) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode=used` | | Skip only code-referenced addresses |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_tag_table_data` | | Export tag table to CSV or XLSX |
-| **`udt`** | **10** | **User-defined type operations** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list` | | List all UDTs |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_structure` | | UDT member structure |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create` | | Create new UDT |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete` | | Delete UDT |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_member` | | Add member to UDT (bulk: members[]) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_member` | | Remove member (bulk: memberNames[]) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_member` | | Update member type, initial value, comment |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_member_comment` | | Update member comment |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_xml` | | Export UDT to XML (file or inline) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`import_xml` | | Import UDT from XML (filePath / xmlContent / exportId) |
-| **`watch`** | **13** | **Watch and force table debugging** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_tables` | | List all watch + force tables |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_table` | | Create watch table |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_table` | | Delete watch table |
-| &nbsp;&nbsp;&nbsp;&nbsp;`rename_table` | | Rename watch table |
-| &nbsp;&nbsp;&nbsp;&nbsp;`clear_table` | | Remove all entries |
-| &nbsp;&nbsp;&nbsp;&nbsp;`import_table` | | Import from XML (filePath / xmlContent / exportId) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_entries` | | List entries with addresses/formats |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_entry` | | Add watch/force entry |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_entry` | | Update entry fields |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_entry` | | Remove entry by address |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_table` | | Export to XML (file or inline) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_watch_data` | | Export watch table to CSV or XLSX |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_force_data` | | Export force table to CSV or XLSX |
-| **`hardware`** | **12** | **Hardware config, network, I/O** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_device` | | Single device configuration |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_rack_slot_details` | | Rack/slot topology + I/O assignments |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_full_config` | | All devices configuration |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_network` | | Subnets, nodes, IO systems |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_io_map` | | Full I/O address map |
-| &nbsp;&nbsp;&nbsp;&nbsp;`compile_device` | | Compile single device HW |
-| &nbsp;&nbsp;&nbsp;&nbsp;`compile_all` | | Compile all HW |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_csv` | | Device list to CSV |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_xlsx` | | Device list to Excel |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_io_map` | | Full device I/O map (rack/slot + tags) to CSV or XLSX |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_hardware_map` | | Raw CAx/AML hardware data to CSV or XLSX |
-| &nbsp;&nbsp;&nbsp;&nbsp;`set_network_config` | | Set IP, subnet, PROFINET name, station name |
-| **`library`** | **26** | **Library types, master copies, lifecycle** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_libraries` | | List project + open global libraries |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_info` | | Library details + counts |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_folder` | | Browse folder contents |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `section` | | types / master_copies / both |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_tree` | | Recursive tree dump |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `section` | | types / master_copies / both |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `nested` | | Flat list (default) or indented hierarchy |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `includeItems` | | false = folder structure only (fast orientation) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`find` | | Search by glob pattern (* and ?) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `section` | | types / master_copies / both |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_type` | | Type details + version list |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `includeXml` | | Inline XML body (capped ~30KB) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `version` | | latest_committed (default) / explicit / latest_any |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_master_copy` | | Master copy metadata |
-| &nbsp;&nbsp;&nbsp;&nbsp;`publish_block_as_master_copy` | | Publish FB/FC/OB to library |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `onCollision` | | autoRename / replace / fail |
-| &nbsp;&nbsp;&nbsp;&nbsp;`publish_plc_type_as_master_copy` | | Publish UDT to library |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_master_copy` | | Delete master copy |
-| &nbsp;&nbsp;&nbsp;&nbsp;`instantiate_master_copy` | | Copy master copy into project |
-| &nbsp;&nbsp;&nbsp;&nbsp;`instantiate_library_type` | | Instantiate versioned type |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_to_multi_instance_fb` | | Add type as multi-instance member |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_library_folder` | | Create folder in library |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_library_folder` | | Delete folder (recursive option) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_type_xml` | | Export type version to XML file |
-| &nbsp;&nbsp;&nbsp;&nbsp;`open_global_library` | | Open .al19 file |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `openMode` | | ReadOnly (default) / ReadWrite |
-| &nbsp;&nbsp;&nbsp;&nbsp;`close_global_library` | | Close global library |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_global_library` | | Create new .al19 |
-| &nbsp;&nbsp;&nbsp;&nbsp;`save_global_library` | | Save global library |
-| &nbsp;&nbsp;&nbsp;&nbsp;`archive_global_library` | | Archive to .zal19 |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_check` | | Preview what update_project would change |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_project` | | Apply library updates to project (destructive) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `deleteUnusedVersions` | | Auto-delete versions with no instances |
-| &nbsp;&nbsp;&nbsp;&nbsp;`promote_to_global` | | Copy types to global library |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `forceUpdateMode` | | SetOnlyHigher / ForceSetAny / NoDefaultVersionChange |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `structureConflictMode` | | CancelIfConflicts / UpdateStructure / RetainStructure |
-| &nbsp;&nbsp;&nbsp;&nbsp;`compare_to_target` | | Diff two libraries |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_unused_types` | | Remove types with no instances (dry-run + confirm) |
-| **`xref`** | **4** | **Cross-reference analysis** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_references` | | Cross-refs for one block (who it calls, what it reads/writes) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `filter` | | all / with_refs / without_refs / unused |
-| &nbsp;&nbsp;&nbsp;&nbsp;`find_unused` | | All blocks not called from any OB chain |
-| &nbsp;&nbsp;&nbsp;&nbsp;`find_callers` | | Which blocks call/reference a target block |
-| &nbsp;&nbsp;&nbsp;&nbsp;`find_orphaned_instance_dbs` | | Instance DBs whose owning FB is missing |
-| **`alarm_text`** | **15** | **PLC alarm text lists, entries, alarm classes** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_textlists` | | List system + user text lists |
-| &nbsp;&nbsp;&nbsp;&nbsp;`create_textlist` | | Create text list (optionally with entries) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `listRange` | | Decimal (default) / Binary / Bit |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_entries` | | Read entries for a text list |
-| &nbsp;&nbsp;&nbsp;&nbsp;`add_entries` | | Add entries to text list |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_entries` | | Update entries by From value |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_entries` | | Delete entries by From value |
-| &nbsp;&nbsp;&nbsp;&nbsp;`update_textlist_comment` | | Update comment (direct API) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_textlist` | | Delete user text list |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_texts` | | Export alarm instance texts to XLSX |
-| &nbsp;&nbsp;&nbsp;&nbsp;`import_alarm_texts` | | Import alarm texts from XLSX |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_textlists` | | Export text lists to XLSX |
-| &nbsp;&nbsp;&nbsp;&nbsp;`import_textlists` | | Import text lists from XLSX |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_classes` | | Export alarm class definitions |
-| &nbsp;&nbsp;&nbsp;&nbsp;`import_alarm_classes` | | Import alarm class definitions |
-| &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_data` | | Export alarm data to CSV or XLSX (scope: texts/lists/classes) |
-| **`admin`** | **11** | **Server administration, usage analytics, export storage** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_stats` | | Call statistics per tool+action (counts, errors, avg duration) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_recent_errors` | | Last N failed calls with device/firmware context |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_device_profiles` | | All unique devices seen (order number, firmware, TIA version) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_version` | | Server version, DB path, DB size |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_system_info` | | OS, .NET, TIA Portal version, uptime, memory |
-| &nbsp;&nbsp;&nbsp;&nbsp;`list_exports` | | Recent exports stored in DB (with size, format, timestamp) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_export` | | Retrieve export content with paging |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `raw` | | Content only, no metadata header |
-| &nbsp;&nbsp;&nbsp;&nbsp;`delete_export` | | Delete single export |
-| &nbsp;&nbsp;&nbsp;&nbsp;`clear_exports` | | Delete expired exports |
-| &nbsp;&nbsp;&nbsp;&nbsp;`save_export` | | Save export to file (auto-decodes base64 for XLSX) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`open_file` | | Open exported file with default Windows application |
-| **`diagnostics`** | **6** | **Runtime PLC state, network scan, connection config, compare** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`scan_devices` | | Network scan — discover accessible PLCs |
-| &nbsp;&nbsp;&nbsp;&nbsp;`configure_connection` | | Set up download connection programmatically |
-| &nbsp;&nbsp;&nbsp;&nbsp;`get_plc_status` | | Online/offline state |
-| &nbsp;&nbsp;&nbsp;&nbsp;`go_online` | | Connect to PLC |
-| &nbsp;&nbsp;&nbsp;&nbsp;`go_offline` | | Disconnect from PLC |
-| &nbsp;&nbsp;&nbsp;&nbsp;`compare_online_offline` | | Compare project vs PLC — all blocks, tags, UDTs |
-| **`download_upload`** | **4** | **Download to PLC, upload station into project** |
-| &nbsp;&nbsp;&nbsp;&nbsp;`download_check` | | Pre-flight: connection, compile status |
-| &nbsp;&nbsp;&nbsp;&nbsp;`download_to_device` | | Download to PLC (requires confirm) |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `mode` | | software_changes (default) / software / hardware_software / hardware |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ `stopModules` | | Stop PLC before download (default: false) |
-| &nbsp;&nbsp;&nbsp;&nbsp;`upload_check` | | Enumerate upload connection options |
-| &nbsp;&nbsp;&nbsp;&nbsp;`upload_station` | | Upload PLC station into project (requires confirm) |
-
-**Total: 16 tools (14 meta-tools + 2 standalone), 166 actions**
+| **`admin`** | **13** | **Server administration** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`clear_exports` | | (optional olderThanHours=24) Delete expired exports. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_export` | | (exportId) Delete a single export. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_device_profiles` | | All unique devices seen by the server. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_export` | | (exportId; optional offset, length, raw=false) Retrieve export content with paging. raw=true returns content only, no metadata header. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_recent_errors` | | (optional count=10) Last N failed tool calls with device/firmware context. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_system_info` | | OS, .NET version, TIA Portal version, process uptime. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_stats` | | (optional top_n=20) Call statistics per tool+action, sorted by total calls. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_version` | | Server version, DB path, DB size. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_exports` | | (optional tool, limit=20) Recent export results stored in export DB. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`open_file` | | (filePath) Open a file using the Windows default application (Excel for .xlsx, browser for .html, etc.). Use after any export action to let the user inspect results immediately. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`reset_device_catalog` | | Clear local device catalog and re-dump from TIA Portal if connected. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`save_export` | | (exportId, outputPath) Save export content to a file. Auto-decodes base64 for binary formats (XLSX). After saving, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`search_device_catalog` | | (optional filter, limit=50) Search installed TIA hardware catalog from local DB. No TIA Portal needed. Use for hardware reference lookups (order numbers, CPU models, compatible modules). |
+| **`alarm_text`** | **15** | **Alarm texts & text lists** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_entries` | | (deviceName, textlistName, entries[]) Add entries to a text list. Each entry: {from, to, text}. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_textlist` | | (deviceName, textlistName; optional listRange=Decimal, comment, entries[]) Create new text list. Works on empty devices (auto-seeds via template). Optionally populate with entries in one call. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_entries` | | (deviceName, textlistName, fromValues[]) Delete entries by From value. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_textlist` | | (deviceName, textlistName) Delete a user text list. System text lists rejected. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_classes` | | (deviceName, outputPath) Export alarm class definitions. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_data` | | (deviceName, format:csv\|xlsx; optional scope:alarm_texts\|textlists\|alarm_classes, outputPath, includeInfoText) Export alarm data to CSV or XLSX for documentation. Defaults to exports_root\alarm_text\. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_alarm_texts` | | (deviceName, outputPath; optional includeInfoText) Export alarm instance texts to XLSX. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_textlists` | | (deviceName, outputPath; optional textListNames[]) Export text lists to XLSX. All if no filter. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_entries` | | (deviceName, textlistName) Read all entries for a text list. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`import_alarm_classes` | | (deviceName, filePath) Import alarm class definitions. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`import_alarm_texts` | | (deviceName, filePath) Import alarm instance texts from XLSX. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`import_textlists` | | (deviceName, filePath; optional overwrite) Import text lists from XLSX. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_textlists` | | (deviceName) List system and user text lists with name, ID, range. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_entries` | | (deviceName, textlistName, entries[]) Update entries by From value. Each entry: {from, to?, text?}. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_textlist_comment` | | (deviceName, textlistName, newComment) Update text list comment directly. |
+| **`blocks_read`** | **16** | **Read & export blocks** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`check_consistency` | | (deviceName) M10: IsConsistent flag can lag compile — use compile_all output instead. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`compile_all` | | (deviceName) Compile all. Run early to resolve F6. Slow first run (~30-60s). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`compile_block` | | (deviceName, blockName) Compile one block. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_all_xml` | | (deviceName, outputDirectory) All blocks as .xml files. M5: arg is 'outputDirectory' not 'outputPath'. After export, ask the user if they want to open the output directory (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_source` | | (deviceName, blockName, outputPath) SCL/STL source. M3: outputPath must be a DIRECTORY. LAD/FBD return empty. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_xml_file` | | (deviceName, blockName, outputPath) Block XML to disk. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_xml_inline` | | (deviceName, blockName) Parsed XML summary. F6 applies. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_all_interfaces_summary` | | (deviceName) Member counts per section for all blocks. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_compiler_errors` | | (deviceName) Error-only filter. Same M8 recompile quirk. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_compiler_messages` | | (deviceName) M8: triggers fresh compile. Prefer compile_all output if just compiled. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_details` | | (deviceName, blockName) Type, number, language, interface size, consistency. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_element_pins` | | (deviceName, blockName, networkIndex; optional elementUId or elementIndex) The 'look before you wire' card: for a Call or instruction Part, every pin with section, EXPECTED data type (read live from the callee interface / instance structure) and current wiring (operand + its resolved type, or UNWIRED OpenCon). Without a selector: lists the network's elements with UIds. Use BEFORE blocks_write u... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_interface` | | (deviceName, blockName) Full interface sections. F6: flakes on inconsistent blocks — compile_all first. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_network` | | (deviceName, blockName, networkIndex; optional includeUIds) #171 rung editor READ side: reconstructs the network's flat Parts+Wires graph into a JSON rung model - EXACTLY the vocabulary create_block networks[].rungs accepts (contacts/parallelBranches/box/output/call, plus enFrom for ENO-cascaded call chains). Output: {title, comment, editable, rungs[], unmodelled[]}. editable=true means the mod... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_xml_raw` | | (deviceName, blockName) Raw XML string. F6 applies. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list` | | (deviceName; optional typeFilter:all\|code\|OB\|FB\|FC\|DB\|GlobalDB\|InstanceDB, includeInstanceDbs) Compact block table. |
+| **`blocks_write`** | **24** | **Create & import blocks** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_interface_member` | | (deviceName, blockName, section, memberName, dataType; optional startValue, comment, confirm) #171 interface editor: add a member to an FB/FC/OB interface section (Input, Output, InOut, Static, Temp, Constant). BLAST RADIUS is computed FIRST (xref callers whose call sites go out of date + the FB's instance DBs + the #183 reinitializeDataBlocks warning: download resets actual values of affected ... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_multi_instance_member` | | (deviceName, parentFB, memberName, innerType; optional onCollision=fail\|replace) Add typed static member to FB. innerType must exist in device or project.ProjectLibrary. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_network` | | (deviceName, blockName; optional position, title, comment) Insert empty network at position (default: end). LAD/FBD only — SCL blocks have a single compilation unit and do not support multiple networks. Use populate_network / insert_rung to add logic afterward. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`copy_block` | | (deviceName, blockName, newName; optional targetFolder, createParents=false) Duplicate a block under a new name (block names are PLC-WIDE unique, so newName is mandatory and checked recursively). targetFolder omitted = copy lands next to the source block. The copy gets the next free number of its type. Source block is never modified. OFFLINE required. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_block` | | (deviceName, blockName, blockType:FB\|FC\|OB, language; optional blockNumber, interface, sclCode, networks, blockTitle, blockComment, author, version, memoryLayout, secondaryType, overwrite) Full block creation with custom interface and logic. blockNumber auto-assigned if omitted — ONLY for genuinely new blocks. When using overwrite=true to update an existing block (e.g. adding calls to an existi... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_fb` | | (deviceName, fbName; optional fbNumber, language:LAD\|SCL\|FBD (STL not supported - Openness limitation), author, version, autoCompile=true, targetFolder, createParents=false) New FB. Number auto-assigned if omitted. Auto-compiles and returns errors. targetFolder ('Motors/Drives' syntax) creates the block directly inside that folder; missing folders are an ERROR unless createParents=true. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_fc` | | (deviceName, fcName; optional fcNumber, language, returnType=Void, author, version, autoCompile=true, targetFolder, createParents=false) New FC. Number auto-assigned if omitted. Auto-compiles and returns errors. targetFolder as in create_fb. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_ob` | | (deviceName, obName; optional obNumber, language, author, version, autoCompile=true, targetFolder, createParents=false) New OB. Number auto-assigned if omitted (starts at 123). obNumber=1 allowed; 2-122 reserved. Auto-compiles and returns errors. targetFolder as in create_fb. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_block` | | (deviceName, blockName; optional force=false) Delete any block. Instance DBs rejected unless force=true (useful for orphaned instance DBs). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_interface_member` | | (deviceName, blockName, memberName; optional section, confirm) Remove an interface member. Same blast-radius confirm gate. Logic still referencing the member will fail compile - check first with xref get_references. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_network` | | (deviceName, blockName, networkIndex) Remove network by 0-based index. Refuses if last network. LAD/FBD only. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_rung` | | (deviceName, blockName, networkIndex, rungIndex; optional expectTitle) Remove rung rungIndex. Refuses when the NEXT rung chains (enFrom) from the deleted one - retarget or delete the tail first. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`import_xml_file` | | (deviceName, filePath; optional overwrite, autoCompile=true, targetFolder, createParents=false) Import from XML file. Auto-compiles and returns errors. Preferred for large payloads. targetFolder as in import_xml_inline. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`import_xml_inline` | | (deviceName, xmlContent; optional overwrite, autoCompile=true, targetFolder, createParents=false) Import block from XML string. Auto-compiles and returns errors. Large payloads (12KB+) verified. targetFolder imports into that folder; without it, overwrite=true auto-targets the folder the existing block already lives in (owning-group import). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`insert_rung` | | (deviceName, blockName, networkIndex, rung; optional position, expectTitle) #171 rung editor: insert ONE rung (create_block rung vocabulary: contacts/parallelBranches/box/output OR call{blockName,blockType,instanceDB,scope,pins}, optional enFrom for eno chaining) into an EXISTING LAD network at position (default: append). The network must be fully modelled (get_network editable=true) - refused ... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`move_block` | | (deviceName, blockName, targetFolder; optional createParents=false) Move a block into another folder ('' or '/' = container root). Openness V19 has NO native move — this is export -> delete -> import into the target group, with automatic restore to the original folder if the import fails. Verified by re-resolution and recompiled afterwards. OFFLINE required. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`populate_network` | | (deviceName, blockName, networkIndex, rungs; optional overwriteExisting, expectTitle) Fill a network with a rungs[] array (create_block networks[].rungs vocabulary incl. enFrom chains). Empty networks (fresh add_network) populate directly; non-empty networks require overwriteExisting=true AND full modelling (get_network first to preserve content). #164-style pre-import validation with JSON-path... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`remove_multi_instance_member` | | (deviceName, parentFB, memberName) Remove static multi-instance member. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`rename_block` | | (deviceName, blockName; optional newName, newNumber) Rename/renumber. Does NOT auto-cascade to callers. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`replace_network` | | (deviceName, blockName, networkIndex; optional title, comment) Replace network title/comment. LAD/FBD only — sclCode not supported (SCL XML is tokenized; use create_block with overwrite=true to rebuild SCL blocks). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_interface_member` | | (deviceName, blockName, memberName; optional section, newName, newDataType, newStartValue, newComment, confirm) Update or RENAME (newName) an interface member. Section omitted = searched in all sections; miss lists members per section. Same blast-radius confirm gate. Empty-string newStartValue/newComment removes. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_network` | | (deviceName, blockName, networkIndex; optional title, comment) Update network title/comment (0-based index). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_network_element` | | (deviceName, blockName, networkIndex, elementUId or elementIndex; optional newInstance, newTarget, pinWires) Surgical editing of Call elements in LAD/FBD. newInstance: swap instance DB. newTarget: retarget to different FB/FC (regenerates parameters, preserves matching wires). pinWires: JSON object mapping pin names to new operands — TYPE-CHECKED before any mutation against the pin's declared ty... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_rung` | | (deviceName, blockName, networkIndex, rungIndex, rung; optional expectTitle) Replace rung rungIndex with the given rung object. Same modelled-network requirement and renumbering caveat as insert_rung. |
+| **`db`** | **11** | **Data block management** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_member` | | (deviceName, dbName, memberName, dataType; optional comment, initialValue) Add member to global DB. Supports all types including arrays (e.g. Array[0..9] of Int) and UDT refs. Global DBs only — instance DBs rejected. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create` | | (deviceName, dbName; optional dbNumber, author, version, memoryLayout, targetFolder, createParents) New global DB. Number auto-assigned if omitted. targetFolder ('Motors/Drives' syntax) creates the DB directly inside that folder; missing folders are an ERROR unless createParents=true. For instance DBs, use create_instance_db instead. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_instance_db` | | (deviceName, dbName, instanceOfName; optional dbNumber) Create instance DB for an FB. TIA auto-populates interface from the FB. instanceOfName must be an existing FB. Number auto-assigned if omitted. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete` | | (deviceName, dbName) Delete DB. Rejects instance DBs (delete owning FB instead). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_member` | | (deviceName, dbName, memberName) Remove member from global DB. Refuses last member. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_member` | | (deviceName, dbName, path; optional depth=2) #171 instance-data READ at ANY depth: dotted member path into nested multi-instance chains, instruction instances, UDT/struct members (e.g. 'modbus.BWTT-RR8_Instance.mb_addr'). Card shows type, start value(s) incl. per-array-element, comment, children to depth. Works on GLOBAL and INSTANCE DBs (exception: system-block iDBs cannot be exported). Member... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_structure` | | (deviceName, dbName) Full member list with types, start values, attributes via XML export. Flat list (no nesting hierarchy). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list` | | (deviceName) All global and instance DBs. Names are qualified 'Folder/Sub/Name' paths (#185). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`set_start_value` | | (deviceName, dbName, path, value \| values{path:value,...}) #171 instance-data WRITE at ANY depth, on global AND instance DBs (start values only, never structure - the multi-instance config surface, e.g. a station call's mb_addr default inside the poll DB). Array elements via [index] on the LAST segment ('Cfg_HwId[3]'). Values are TIA literals as strings ('33', 'TRUE', 'T#2S', '16#00FF'). ALL pa... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_member` | | (deviceName, dbName, memberName; optional newDataType, newStartValue, newComment) Update member properties. At least one field required. Start values preserved on type change unless newStartValue explicitly provided. If TIA rejects due to type/value mismatch, provide a compatible newStartValue. Consecutive member edits can leave the DB export-inconsistent — the tool auto-compiles and retries ON... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_member_comment` | | (deviceName, dbName, memberName, newComment) Shortcut for comment-only update. CRITICAL: arg is 'newComment', NOT 'comment'. |
+| **`diagnostics`** | **7** | **PLC diagnostics & connection** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`compare_online_offline` | | (deviceName) Compare all software objects (blocks, tags, UDTs, technology objects) between the offline project and online PLC. Auto-connects if offline. Read-only. Returns per-item status: Identical/Different/Only on PLC/Only in project. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`configure_connection` | | (deviceName, pcInterfaceName, confirm; optional targetIp, skipConfirm=false) Sets up the download connection programmatically. targetIp defaults to the device's project-configured IP from the hardware config — omit it in the normal case; pass it only to target a different address (e.g. from scan_devices). Creates a ConfigurationAddress inside the TargetInterface, then applies the configuration.... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_device_ip` | | (deviceName) Read-only. Reports the device's project-configured IP (the default target for configure_connection and download_to_device) plus every network interface with IP/mask/subnet. Call this to answer 'which IP does this PLC use' from the project — no network scan needed. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_plc_status` | | (deviceName) CONNECTION state (Online/Offline/NotReachable/Protected/...), whether the download connection is configured, AND the CPU's ACTUAL operating state, READ LIVE. RUN/STOP is absent from the engineering API entirely, so the state is obtained via live_data: this action resolves the IP of the device you NAMED, opens a live-data session if one is free, confirms the CPU's identity against t... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`go_offline` | | (deviceName) Disconnect from PLC. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`go_online` | | (deviceName) Connect to PLC via OnlineProvider. Run download_check first (silently) to verify interface is configured. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`scan_devices` | | (optional deviceName) Read-only network scan. Discovers accessible PLCs via GetAccessibleDevices(). Returns IP, DeviceSeries, MAC, Name per PcInterface, each ANNOTATED [IN PROJECT: <device>] or [NOT IN THIS PROJECT]. With deviceName: scans via DownloadProvider. Without: scans via StationUploadProvider (project scope). No confirmation needed. SCOPE: this is a layer-2 PROFINET DCP broadcast — it ... |
+| **`download_upload`** | **4** | **Download / upload to PLC** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`download_check` | | (deviceName) Silent pre-flight. Call this BEFORE any download or go_online. Do not output text before calling. Verdicts: READY (all gates verified incl. compile), NOT READY (a gate FAILED — relay the issue), COMPILE UNVERIFIED (compile gate could not run, e.g. device is online — NOT a pass; download_to_device still compiles offline itself, but the check did not verify it). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`download_to_device` | | (deviceName, confirm; optional mode=software_changes, stopModules=false, startAfterDownload=true, reinitializeDataBlocks=false, pcInterfaceName) DESTRUCTIVE. Mandatory compile pre-check. confirm='I understand this will modify the PLC'. mode: software_changes\|software\|hardware_software\|hardware. pcInterfaceName selects which network adapter to route through (from scan_devices results). hardware/... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`upload_check` | | Silent pre-flight. Call this BEFORE any upload. Do not output text before calling. If result shows READY, proceed to upload_station. If NOT READY, relay the issue to the user. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`upload_station` | | (modeName, pcInterfaceName, confirm; optional addressIndex=0, readPassword, writePassword) DESTRUCTIVE TO PROJECT (adds device). confirm='I understand this will add a device to the project'. |
+| **`folders`** | **5** | **Project-tree folders (groups)** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_folder` | | (deviceName, container, path; optional createParents=false) Create the folder at path. Nested paths use '/' (e.g. 'Motors/Drives'). Missing intermediate folders are an ERROR unless createParents=true — never created silently. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_folder` | | (deviceName, container, path; optional deleteContents=false, confirm) DESTRUCTIVE. Empty folder deletes immediately. Non-empty requires BOTH deleteContents=true AND confirm containing 'I understand' — deletion permanently removes ALL contained items and subfolders. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`find` | | (deviceName, container, query; optional path, typeFilter, caseSensitive=false) Glob search across the WHOLE container: * matches any sequence, ? one character (e.g. 'mb_*', '*HMI*'). Returns Name  [key=value, ...] (same envelope and per-container keys as get_tree) + folder location per match; capped at 200 with explicit truncation. get_tree answers SHAPE, find answers IDENTITY - use find when y... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_tree` | | (deviceName, container; optional path, nested=true, includeItems=false, depth=0 unlimited (1 = immediate children), typeFilter, limit) ONE-call tree view: folders with item/subfolder counts, plus contained items when includeItems=true. Item lines use ONE envelope on every container: Name  [key=value, key=value] with keys lowercase, comma-space separated, inapplicable keys omitted. Keys per cont... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`rename_folder` | | (deviceName, container, path, newName) NOT SUPPORTED by Openness V19: the folder name is read-only in the API, so this returns Error: RenameFailed. There is no move API either; rename folders in the TIA Portal UI. |
+| **`get_info`** | **-** | **Server information** |
+| **`hardware`** | **14** | **Hardware configuration** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`compile_all` | | Compile all HW. M4: 'Not compilable' = nothing needed recompiling (not an error). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`compile_device` | | (deviceName) F1: NullReferenceException — use compile_all instead. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`dump_catalog` | | Dump full TIA Portal hardware catalog (~11K entries) to local DB. Runs automatically on first TIA connection or TIA version change. Manual trigger for HSP updates. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_csv` | | (outputPath) Device list to CSV. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_hardware_map` | | (format:csv\|xlsx; optional deviceName, outputPath) Export raw CAx/AML hardware data for a device as flat table. Shows everything Siemens exports: rack, CPU, sub-items, signal modules, channels, addresses, tags. Single sheet. Defaults to exports_root/hardware/. Filename: {ProjectName}_{PLCName}_hardware_map_{timestamp}.{ext}. After export, ask the user if they want to open the file (use admin ac... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_io_map` | | (format:csv\|xlsx; optional deviceName, outputPath) Export complete device I/O map combining rack/slot topology with tag assignments. XLSX: one sheet per slot + summary. CSV: flat combined. Omit deviceName to export all devices (one file each). Defaults to exports_root/hardware/. Filename: {ProjectName}_{PLCName}_io_map_{timestamp}.{ext}. After export, ask the user if they want to open the file ... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_xlsx` | | (outputPath) Device list to Excel. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_device` | | (deviceName) Detailed config for one device. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_full_config` | | Complete hardware config for all devices. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_io_map` | | Full I/O address map across all devices/modules. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_network` | | Subnets, nodes, IO systems across project. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_rack_slot_details` | | (deviceName) Rack/slot topology with I/O address assignments. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`search_catalog` | | (filter) Live real-time search of TIA Portal hardware catalog. Requires TIA Portal running. Capped at 50 results. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`set_network_config` | | (deviceName, confirm; optional ipAddress, subnetMask, useRouter, routerAddress, ipProtocolSelection, useIsoProtocol, pnDeviceNameAutoGeneration, stationName, pnDeviceName) Set network config on a device's PROFINET interface. pnDeviceName sets the PROFINET device name directly (auto-disables auto-generation). stationName renames the device. Modifies project config only — download to PLC required... |
+| **`library`** | **25** | **Library management** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_to_multi_instance_fb` | | (deviceName, parentFB, memberName, path; optional library='project', version, onCollision=fail\|replace) Resolve library type + delegate to blocks_write add_multi_instance_member. Type must be seeded via instantiate_library_type first. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`archive_global_library` | | (libraryName; optional targetDirectory, targetName, mode=Compressed) Create .zal19 archive. targetDirectory defaults to configured archives root — do NOT pass targetDirectory unless user explicitly specifies a different path. If archives root is not configured, direct user to open_manager → Paths tab to set it. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`close_global_library` | | (libraryName) Close loaded global library. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`compare_to_target` | | (targetLibrary; optional library='project', includeIdentical=false) Compare libraries: only_in_source, only_in_target, differs, identical. Read-only. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_global_library` | | (name; optional targetDirectory) Create new empty .al19. targetDirectory defaults to configured libraries root — do NOT pass targetDirectory unless user explicitly specifies a different path. If libraries root is not configured, direct user to open_manager → Paths tab to set it. Opens in ReadWrite. Call save_global_library to persist. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_library_folder` | | (folderPath; optional library='project') Create subfolder (idempotent, auto-creates intermediates). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_library_folder` | | (folderPath; optional library='project', recursive=false) Delete subfolder. Non-empty refused unless recursive=true. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_master_copy` | | (path; optional library='project') Delete by full slash-path. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_unused_types` | | (optional library='project', path, mode=preserve_default\|delete_all, dryRun=true, confirm) Remove types with zero instances. dryRun=true default; set false + confirm to execute. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_type_xml` | | (library, path, outputPath; optional version, overwrite=false) Export type version to XML file. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`find` | | (library, query; optional path, typeFilter:all\|types\|master_copies, caseSensitive=false, limit) Glob search (* and ?). Recursive walk, cap 500 matches with loud NOTICE on truncation; matches carry the same envelope as get_tree. Scope with path on huge libraries. section was REMOVED (use typeFilter). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_info` | | (library) Metadata: edit mode, version, author, item counts, root folders. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_master_copy` | | (library, path) Master copy metadata: name, author, date, comment, wrapped kind. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_type` | | (library, path; optional version='latest_committed', includeXml=false) Type metadata + version list. includeXml=true inlines XML body (cap ~30KB). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_tree` | | (library; optional path (default root), depth=0 unlimited (1 = immediate children), nested=true, includeItems=false, typeFilter:all\|types\|master_copies, limit) Recursive subtree view - args, defaults and depth rule now IDENTICAL to folders get_tree (v3.0.0). nested=false = flat path list (the machine contract). Cap 1000 items, loud NOTICE on truncation. Type lines carry the uniform envelope [ve... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`instantiate_library_type` | | (deviceName, path; optional library='project', version='latest_committed') Instantiate type version into device blocks. Only Committed versions. Side effect: seeds project.ProjectLibrary. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`instantiate_master_copy` | | (deviceName, path; optional library='project') Materialize master copy into device blocks. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_libraries` | | All libraries (project + loaded globals). Returns names for 'library' arg. Reserved name 'project' = project library. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`open_global_library` | | (optional path; optional openMode=ReadOnly\|ReadWrite) Load .al19 file. Without path, lists available libraries from configured libraries root. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`promote_to_global` | | (targetLibraryName; optional sourceLibrary='project', path, forceUpdateMode, structureConflictMode, deleteUnusedVersions) Copy types to writable global library. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`publish_block_as_master_copy` | | (deviceName, blockName; optional library='project', folderPath='', onCollision=autoRename\|replace\|fail) Publish FB/FC/OB/GlobalDB as master copy. Works on inconsistent blocks. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`publish_plc_type_as_master_copy` | | (deviceName, udtName; optional library, folderPath, onCollision) Same as above for UDTs. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`save_global_library` | | (libraryName) Persist open global library to .al19. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_check` | | (optional library='project', path, mode=ReportOutOfDateOnly) Preview what update_project would change. Read-only. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_project` | | (optional library='project', path, deleteUnusedVersions=false) DESTRUCTIVE: apply library-type updates to all matching blocks. Run update_check first. |
+| **`live_data`** | **11** | **Live PLC values + diagnostics** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`connect` | | (host; optional password) Attach to a PLC over an encrypted connection (TCP port 102). host = PLC IP. password only if the CPU access level requires it (never logged/echoed). If password is omitted and one was stored via set_credential for this host, it is used automatically. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_credential` | | (host; optional passwordClass) Remove stored credential(s) for a host. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`disconnect` | | Release the live-data session. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_status` | | Live-data readiness, connection state, PLC identity. Safe anytime. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_credentials` | | List stored credentials (host, class, label, timestamps). NEVER shows the secret. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_readable` | | (optional root, limit) What the PLC actually exposes for reading, by root. No argument = one line per root with leaf counts; root=MArea (or a DB name) lists that root's leaves. Use this when a tag comes back unresolved - it separates 'not declared' from 'whole area empty'. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`read_db` | | (dbName; optional members[]) Live values of a data block (optimized or standard), symbolic, with quality codes. members[] limits to specific members. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`read_diagnostics` | | (optional kind=all\|identity\|protection\|alarms\|buffer, maxEntries) CPU order number + firmware (online - Openness CANNOT read this), protection level, active + configured alarms, and the CPU diagnostic buffer (kind=buffer or all): the same event log TIA Portal shows under Online and Diagnostics, newest first, timestamped from the CPU clock in UTC. Event text is resolved locally from a catalog, s... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`read_tag_table` | | (deviceName, tagTableName; optional tags[]) Live values for a PLC tag table. Tags may be named symbolically or by absolute address (%M1.0, %MB1, %MW20, %MD4, and the %I/%Q equivalents). Blocks if the named device's order number differs from the connected CPU's. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`read_watch_table` | | EITHER (symbols[]) for fully-qualified symbols, OR (deviceName, watchTableName) to resolve a project watch table and read its entries live. Passing both is an error. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`set_credential` | | (host, password; optional passwordClass, label) Store a CPU password ENCRYPTED at rest (machine-bound), so connect can use it without passing the password each time. The secret is never echoed or logged. |
+| **`open_manager`** | **-** | **Open Manager window** |
+| **`session`** | **16** | **Session management** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`archive` | | (optional outputDirectory; optional archiveName, timestamp, archivationMode, saveChanges) Create .zapXX archive. outputDirectory defaults to configured archives root — do NOT pass outputDirectory unless user explicitly specifies a different path. If archives root is not configured, direct user to open_manager → Paths tab. timestamp=true default. archivationMode: None\|Compressed\|DiscardRestorabl... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`close_project` | | (optional saveChanges) Close project. saveChanges: prompt\|save\|discard\|auto. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`configure` | | (optional projectsRoot, archivesRoot, exportsRoot, librariesRoot, httpEnabled) Set default folder paths for create/open/archive/exports/libraries. Validates directory exists (exportsRoot auto-creates if missing). Use open_manager GUI as alternative. ALSO (#168): preferredTiaBinding=<version> is the TIA Portal SELECTOR - on a PC with several TIA Portals installed, pick which one TiaCommander bin... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`connect` | | (optional withUI=true) Attach to running TIA Portal, auto-loads first project. Releases any stale handle first. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create` | | (name; optional parentDirectory, withUI=true) Create new project. Self-contained: auto-launches TIA Portal or attaches to a running instance, cleans up stale handles. ASCII names only (M12). parentDirectory defaults to configured projects root — do NOT pass parentDirectory unless user explicitly specifies a different path. If projects root is not configured, direct user to open_manager → Paths ... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`disconnect` | | (optional saveChanges, closeTia) Release Openness handle. closeTia=true also terminates TIA process. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_project` | | Name, path, version, device count of open project. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_state` | | Proactive state check. Returns state level (0-4), TIA/project/device status, license info, and restart flag. Call at session start. Works at any state. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`info` | | Server version, tool count, workflow hint. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`is_dirty` | | Returns true/false for unsaved changes. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`launch` | | (optional withUI=true) Start new TIA Portal (no project). Releases any stale handle first. Prefer create/open which auto-launch. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_archives` | | (optional archivesRoot) List all .zap* archive files from configured or explicit archives root. Shows filename, size, date, TIA version. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_devices` | | All devices in project. Provides deviceName for other tools. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`open` | | (optional projectPath; optional withUI=true) Open project, auto-launch TIA if needed. Idempotent. Without projectPath, lists available projects from configured projects root. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`save` | | Save project. OFFLINE REQUIRED: refuses with OnlineModeRestriction while any device is online — run diagnostics go_offline first. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`save_as` | | (newName; optional newParentDirectory) Save copy at new location. newParentDirectory defaults to configured projects root if set. |
+| **`tag`** | **13** | **PLC tag management** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_tag` | | (deviceName, tagTableName, tagName, dataType; optional logicalAddress, comment) Add tag. dataType: Bool, Int, Real, etc. logicalAddress: %%M0.0, %%MW100. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_table` | | (deviceName, tagTableName; optional targetFolder, createParents=false) New empty table. targetFolder ('Motors/Drives' syntax) creates it directly inside that folder in the PLC tags tree; missing folders are an ERROR unless createParents=true. Name collision is checked recursively across all folders. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_table` | | (deviceName, tagTableName) Delete table and all tags. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_tag` | | (deviceName, tagTableName, tagName) Delete single tag. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_tag_table_data` | | (deviceName, tagTableName, format:csv\|xlsx\|xml; optional outputPath) Export tag table to CSV or XLSX for documentation/analysis, or to raw TIA XML (format=xml) for round-trip/import. Columns: Name, DataType, Address, Comment, ExternalAccessible, ExternalVisible, ExternalWritable. Defaults to exports_root\tag\ if no outputPath. After export, ask the user if they want to open the file (use admin ... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`find_next_free` | | (deviceName; optional area:M\|I\|Q, startByte:int, dataType:Bool\|Byte\|Word\|DWord\|Int\|Real\|etc., mode:declared\|used) Find next free address. mode=declared (default, safest): skips all declared tag addresses. mode=used: skips only addresses referenced in code. Alignment: Bool=any bit, Byte=byte, Word=even byte, DWord=4-byte. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_assignment_list` | | (deviceName; optional area:M\|I\|Q\|all, mode:declared\|used\|conflicts) Address occupancy for M/I/Q areas + HW I/O. mode=declared (default): all tag addresses. mode=used: only addresses referenced in block code (mirrors TIA Assignment List). mode=conflicts: addresses used in 2+ blocks with Read/Write detail — detects double assignments. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_table_details` | | (deviceName, tagTableName) All tags with types, addresses and comments. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_tables` | | (deviceName) All tag tables, one line each with qualified 'Folder/Sub/Name' path and the uniform envelope [type=PlcTagTable, tags=N]. Totals reconcile with folders get_tree (container=tag_tables). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`move_table` | | (deviceName, tagTableName, targetFolder; optional createParents=false) OFFLINE REQUIRED. Move a tag table between folders ('' = container root). Emulated as export -> delete -> import into the target folder (spike-proven full fidelity); restore-on-failure back to the original location. NOTE: tag tables cannot be COPIED - PLC tag names are global across all tables. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`search` | | (deviceName, tagName) Substring match across all tables. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`set_access` | | (deviceName, tagTableName, tagName, accessible, visible, writable) CRITICAL: args are accessible/visible/writable, NOT externalAccessible etc. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_comment` | | (deviceName, tagTableName, tagName, newComment) CRITICAL: arg is 'newComment', NOT 'comment'. |
+| **`udt`** | **11** | **User-defined type management** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_member` | | (deviceName, udtName, memberName, dataType; optional comment, initialValue) Add member via XML round-trip. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create` | | (deviceName, udtName) New empty UDT (uses SCL ExternalSources workaround internally - creates at the ROOT of PLC data types only). For a foldered UDT: create at root, then action=move. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete` | | (deviceName, udtName) Delete UDT. Rejects if still referenced. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_member` | | (deviceName, udtName, memberName) Remove member via XML round-trip. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_xml` | | (deviceName, udtName, outputPath) Export UDT to XML file. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_structure` | | (deviceName, udtName) Full member list with types, comments, access flags via XML. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`import_xml` | | (deviceName, filePath OR xmlContent; optional overwrite) Import UDT from XML. filePath reads from disk; xmlContent accepts inline XML string (no file tool needed). Reliable for round-trips; may fail on synthesized XML (use create+add_member instead). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list` | | (deviceName) All UDTs, one line each with qualified 'Folder/Sub/Name' path, the uniform envelope [type=PlcStruct, num=N] and the modified date. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`move` | | (deviceName, udtName, targetFolder; optional createParents=false) OFFLINE REQUIRED. Move a UDT between folders ('' = container root). Emulated as export -> delete -> import into the target folder (spike-proven); restore-on-failure back to the original location. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_member` | | (deviceName, udtName, memberName; optional newDataType, newInitialValue, newComment) Update member properties. At least one field required. Uses SCL round-trip. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_member_comment` | | (deviceName, udtName, memberName, newComment) CRITICAL: arg is 'newComment', NOT 'comment'. |
+| **`watch`** | **14** | **Watch & force tables** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`add_entry` | | (deviceName, target, tableName, address; optional displayFormat, modifyValue[watch], forceValue[force], modifyTrigger[watch], monitorTrigger, comment). IMPORTANT: always set displayFormat to match the source variable's data type — Bool→Bool, Int/Word→DEC_signed, DInt/DWord→DEC_signed, Real→Float, Time→Time, String→String. Never leave it as default Hex. Look up the data type from the source bloc... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`clear_table` | | (deviceName, watchTableName) Remove all entries, keep table. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`create_table` | | (deviceName, watchTableName; optional targetFolder, createParents=false) New empty watch table. targetFolder creates it directly inside that folder in the watch/force tables tree; missing folders are an ERROR unless createParents=true. Name collision checked recursively (watch AND force tables). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_entry` | | (deviceName, target, watchTableName\|forceTableName, address) Remove entry. ADDRESS FORM: pass the bare absolute address (%%M60.0) OR the exact symbolic name. TIA stores a tag-owned address SYMBOLICALLY, so the bare form is resolved via the tag tables when no entry matches it literally, and the result says 'matched symbolically as ""TagName""'. If the bare address is owned by more than one tag t... |
+| &nbsp;&nbsp;&nbsp;&nbsp;`delete_table` | | (deviceName, watchTableName) Delete watch table. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_force_data` | | (deviceName, forceTableName, format:csv\|xlsx; optional outputPath) Export force table to CSV or XLSX for documentation. Defaults to exports_root\watch\. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_table` | | (deviceName, target, tableName, outputPath) Export to XML. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`export_watch_data` | | (deviceName, watchTableName, format:csv\|xlsx; optional outputPath) Export watch table to CSV or XLSX for documentation. Defaults to exports_root\watch\. After export, ask the user if they want to open the file (use admin action=open_file). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_entries` | | (deviceName, target, watchTableName\|forceTableName) List entries. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`import_table` | | (deviceName, filePath OR xmlContent; optional overwrite) Import from XML. filePath reads from disk; xmlContent accepts inline XML string (no file tool needed). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`list_tables` | | (deviceName) All watch and force tables, one line each with qualified 'Folder/Sub/Name' path and the uniform envelope [type=PlcWatchTable\|PlcForceTable, entries=N, force=true\|false]. Totals reconcile with folders get_tree (container=watch_tables). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`move_table` | | (deviceName, watchTableName, targetFolder; optional createParents=false) OFFLINE REQUIRED. Move a watch/force table between folders ('' = container root). Emulated as export -> delete -> import into the target folder; restore-on-failure back to the original location. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`rename_table` | | (deviceName, watchTableName, newName) Rename (XML round-trip internally). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`update_entry` | | Same params as add_entry. Cannot clear fields (delete+re-add instead). Accepts either address form — see delete_entry. |
+| **`xref`** | **6** | **Cross-reference analysis** |
+| &nbsp;&nbsp;&nbsp;&nbsp;`find_call_paths` | | (deviceName, blockName; optional maxDepth=10) All call paths from OB roots to the target block over CALL edges, e.g. Main [OB1] -> ModbusPoll [FB2] -> mb_query [FB8]. Complements find_callers (find_callers = direct callers only; this = full qualified paths from the OBs). blockName accepts a bare name (resolved recursively across all folders) or a folder-qualified path. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`find_callers` | | (deviceName, blockName) Which blocks call/reference the target block. Iterates every block. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`find_orphaned_instance_dbs` | | (deviceName) Instance DBs whose owning FB is missing or has no TypeInstance/InstanceType reference. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`find_unused` | | (deviceName) All blocks not called from any OB chain. Iterates every block (~5-10ms each). |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_call_tree` | | (deviceName; optional blockName, maxDepth=10) Forward CALL tree: what a root calls, recursively to any depth (default roots: all OBs; blockName accepts bare or folder-qualified name). Each node shows folder-qualified name, block number, call site network, instance DB; system instructions appear as leaves. Cycle-safe; a subtree already shown is collapsed with a marker. |
+| &nbsp;&nbsp;&nbsp;&nbsp;`get_references` | | (deviceName, blockName; optional filter:AllObjects\|ObjectsWithReferences\|ObjectsWithoutReferences\|UnusedObjects) Cross-references for one block. Shows referenced objects with access type (Read/Write/Call etc.) and location. |
+**Total: 18 tools, 205 actions** — action descriptions are abbreviated in this table; the full text for every action is in the machine-readable tool list (`data/tool-list/tools.json`).
 
 Each meta-tool groups related actions behind a single `action` parameter. `get_info` and `open_manager` are standalone utilities that work without a license. Start with `session` to connect, then use any other tool.
 
@@ -434,11 +476,11 @@ Your personal information (name, surname, email) provided during registration is
 
 TiaCommander is actively developed. Here's what we're working on:
 
-- **HMI integration** — Openness API access to HMI screens, tags, and alarm views
-- **Runtime monitoring** — live PLC data via Web API and OPC UA (S7-1200 V4.4+, S7-1500)
-- **TIA Portal V20 support** — updated Openness DLLs and new API features
-- **PLCSIM Advanced** — simulation control for offline development and testing
-- **S7-1500 expanded testing** — broader device family coverage with telemetry-driven validation
+- **HMI integration** — access to HMI screens, tags, and alarm views
+- **Wider live-data coverage** — more of what a running PLC exposes, across more CPU families
+- **Simulation support** — drive PLCSIM for offline development and testing
+- **Broader hardware validation** — more device families and firmware verified in-house, guided by real-world usage
+
 
 Have a feature idea? [Submit it on GitHub](https://github.com/a4webdev/tiacommander-mcp/issues).
 
@@ -475,3 +517,9 @@ See `LICENSE.txt` for full terms. Visit [tiacommander.com](https://tiacommander.
 ## Trademarks
 
 TiaCommander™ is a trademark of SIA A4 Studio. Siemens, TIA Portal, SIMATIC, S7-1200, S7-1500 are trademarks of Siemens AG. TiaCommander is not affiliated with, endorsed by, or sponsored by Siemens AG.
+
+---
+
+## Thank You
+
+Thank you to everyone who has opened an issue or sent us feedback — it genuinely helps us make TiaCommander better, and we read every word. And if your experience has been smooth and there is nothing to report, we would be grateful if you left a star on the repository — it is a small thing, and it helps other Siemens engineers find the tool.
