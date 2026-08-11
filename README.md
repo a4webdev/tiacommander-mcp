@@ -410,6 +410,8 @@ TiaCommander should work with any PLC supported by TIA Portal and the Openness A
 
 This list will grow as we collect telemetry data from users and expand testing across more device families, firmware versions, and TIA Portal editions.
 
+**See what the community is actually running — [tiacommander.com/stats](https://tiacommander.com/stats).** The live compatibility list shows every device reported working across all users, with its order number, firmware and the TIA Portal versions it was seen under, alongside community tool usage and AI client adoption. It is built from anonymised, aggregated telemetry and is a far broader picture than the in-house table above.
+
 ---
 
 ## Block Creation
