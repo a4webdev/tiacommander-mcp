@@ -408,8 +408,6 @@ TiaCommander should work with any PLC supported by TIA Portal and the Openness A
 | S7-1200 CPU 1215C DC/DC/Rly | 6ES7 215-1BG31-0XB0 | V3.0 | V19 |
 | S7-1200 CPU 1217C DC/DC/DC | 6ES7 217-1AG40-0XB0 | V4.2 | V19 |
 
-This list will grow as we collect telemetry data from users and expand testing across more device families, firmware versions, and TIA Portal editions.
-
 **See what the community is actually running — [tiacommander.com/stats](https://tiacommander.com/stats).** The live compatibility list shows every device reported working across all users, with its order number, firmware and the TIA Portal versions it was seen under, alongside community tool usage and AI client adoption. It is built from anonymised, aggregated telemetry and is a far broader picture than the in-house table above.
 
 ---
