@@ -23,6 +23,28 @@ TiaCommander is an MCP server that connects AI assistants to Siemens TIA Portal 
 
 **19 tools, 230 actions** covering the full TIA Portal project lifecycle.
 
+| Tool | What it does |
+|---|---|
+| `admin` | Server administration, usage stats, export storage |
+| `alarm_text` | Alarm texts and text lists, XLSX import / export |
+| `blocks_read` | Read, inspect and export FB / FC / OB / DB blocks (XML, SCL) |
+| `blocks_write` | Create and import blocks (SCL, LAD, FBD, STL) |
+| `db` | Global and instance data-block members and values |
+| `diagnostics` | Connection setup, online / offline compare, PLC state |
+| `download_upload` | Compile-checked download to / upload from the PLC |
+| `folders` | Navigate and organise the project-tree groups |
+| `get_info` | Server capabilities and version |
+| `hardware` | Device, rack / slot, network and I/O configuration |
+| `library` | Master copies, library types, versioned instantiation |
+| `live_data` | Live values and CPU diagnostics from the running controller |
+| `open_manager` | Open the TiaCommander Manager window |
+| `session` | Open, save, archive and switch projects; connection lifecycle |
+| `tag` | PLC tag tables: create, edit, search, address assignment |
+| `technology_objects` | Axes and other technology objects: read, tune, connect to hardware |
+| `udt` | User-defined types: create, edit members, import / export |
+| `watch` | Watch and force tables |
+| `xref` | Cross-references: callers, unused blocks, orphaned instance DBs |
+
 ---
 
 ## What's in the download?
@@ -121,7 +143,7 @@ No installer, no registry changes, no system modifications. Extract, configure, 
 
 **Claude Desktop users:** Download the `.mcpb` bundle from [Releases](https://github.com/a4webdev/tiacommander-mcp/releases/latest) and install via Settings → Extensions → Advanced Settings → Install Extension. No config file editing needed. See the [Quick Start Guide](docs/1-QUICKSTART.md) for details.
 
-> **Prerequisite:** [Siemens TIA Portal](https://www.siemens.com/tia-portal) V15.1 or later must be installed on your machine with the **Openness** component enabled. TiaCommander loads Siemens Openness libraries directly from your TIA Portal installation at runtime. Without TIA Portal, the server starts in **degraded mode** with limited functionality and guides you through setup.
+> **Prerequisite:** [Siemens TIA Portal](https://www.siemens.com/tia-portal) V17 or later must be installed on your machine with the **Openness** component enabled. TiaCommander loads Siemens Openness libraries directly from your TIA Portal installation at runtime. Without TIA Portal, the server starts in **degraded mode** with limited functionality and guides you through setup.
 
 ---
 
@@ -154,7 +176,7 @@ TiaCommander MCP Server
     │
     │  Siemens Openness API
     ▼
-TIA Portal  (V15.1 – V21*, tested on V19)
+TIA Portal  (V17 – V20*, tested on V19)
     │
     ▼
 S7-1200 · S7-1500 · S7-300 · S7-400 · ET 200
@@ -451,6 +473,18 @@ TiaCommander creates complete PLC blocks from structured JSON descriptions:
   - Program flow (FB/FC calls with parameter wiring, JMP/JMPN, RET, LABEL)
 - **Block numbers** — auto-assigned if omitted, or explicit
 - **Custom interfaces** — Input, Output, InOut, Static, Temp, Constant sections
+
+---
+
+## Live Data
+
+The `live_data` tool reads actual values straight from a running CPU — data blocks, tag tables, watch tables and the full CPU diagnostic buffer. It is where TiaCommander earns its keep for debugging and for a tight development feedback loop: change a block, download, and watch the values move without ever leaving your AI client.
+
+- **Separate pipe** — live reads go through a dedicated helper process (the S7 bridge) that talks to the CPU directly over TCP port 102, independent of the Openness engineering connection, so reading live values never disturbs your TIA Portal session.
+- **No licence, nothing extra** — the live-data path needs no Openness licence and no additional Siemens software; it speaks the S7 protocol itself.
+- **TLS and plaintext both supported** — S7-1200 V4.5+ and S7-1500 V2.9+ connect over TLS; older CPUs connect in plaintext. `connect` reports which was actually negotiated for the CPU in front of you.
+- **Optimised and standard blocks** — `read_db` returns symbolic values with quality codes from both optimised and non-optimised (standard) data blocks.
+- **Password-aware** — a CPU password is needed only if the CPU's protection level requires one; it can be stored encrypted at rest (per project or global) so `connect` uses it automatically, and it is never logged or echoed. Save one in the **Credentials** tab of the Manager GUI, or just ask your AI assistant to store it — globally for a PLC IP address, or per project.
 
 ---
 

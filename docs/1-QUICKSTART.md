@@ -4,7 +4,7 @@ Get up and running in 5 minutes.
 
 ## Prerequisites
 
-> - **Siemens TIA Portal V15.1 or later** (Professional edition) — must be installed on your machine
+> - **Siemens TIA Portal V17 or later** (Professional edition) — must be installed on your machine
 > - Openness API enabled during TIA Portal installation
 > - Windows 10/11 (64-bit)
 >
