@@ -159,11 +159,31 @@ rule, not a tool restriction. What you can do instead: move a table between
 folders with the tag move_table action (contents are preserved exactly),
 or create a new table and add the tags you need under new names.
 
+## Individual tags cannot be renamed
+
+TIA Portal's engineering API exposes no rename for a PLC tag: the name is
+readable but not writable. This is an API limitation, not a tool restriction.
+
+It is deliberately not emulated by deleting and re-adding the tag. Tag names
+are global to the whole controller and nothing cascades a change, so a tag
+rebuilt under a new name would leave every place in your program still
+referencing the old name -- and SCL networks cannot be edited programmatically,
+so those references could not be repaired afterwards.
+
+What you can do instead: rename the tag in the TIA Portal IDE, which updates
+the references for you. To move a tag to a different table without losing
+anything, use the tag move action -- it preserves the comment and all three
+access flags, which deleting and re-adding does not.
+
 ## New data types (UDTs) are created at the root of PLC data types
 
-The engineering API cannot create a UDT directly inside a folder. Create
-the UDT first, then move it into its folder with the udt move action.
-Member edits on a foldered UDT keep it in its folder automatically.
+A **brand-new** UDT is created at the root of PLC data types. Create it
+first, then move it into its folder with the udt move action. Member edits
+on a foldered UDT keep it in its folder automatically.
+
+This applies to creating a UDT from scratch. A UDT created **from a library
+type version or a master copy** lands directly in the target folder in a
+single step.
 
 ## PLC diagnostics cannot be read programmatically
 

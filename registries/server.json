@@ -2,13 +2,13 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
   "name": "io.github.a4webdev/tiacommander-mcp",
   "title": "TiaCommander",
-  "description": "Siemens TIA Portal MCP server — AI-assisted PLC programming. 16 tools, 166 actions.",
-  "version": "3.15.2",
+  "description": "Siemens TIA Portal MCP server — AI-assisted PLC programming. 19 tools, 230 actions.",
+  "version": "3.42.0",
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/a4webdev/tiacommander-mcp/releases/download/v3.15.2/TiaCommander-v3.15.2-portable.zip",
-      "fileSha256": "3919ec8b1e3977e13abac37bbb0c031b7daa7536356c40c6b79f7d103714806e",
+      "identifier": "https://github.com/a4webdev/tiacommander-mcp/releases/download/v3.42.0/TiaCommander-v3.42.0-portable.zip",
+      "fileSha256": "4026ebd25cece16854268f2749f468e98267e1f155c497e1a1d1d59c589f39ba",
       "transport": {
         "type": "stdio"
       }

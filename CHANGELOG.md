@@ -1,9 +1,549 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to TiaCommander are documented here.
 
+## v3.42.0 (07-09-2026)
+- **Compiler results now list only real diagnostics.** TIA propagates an error flag up the
+  whole tree with empty text on every intermediate level, and the tools used to print all of
+  it -- 14 "error" rows for 7 actual errors, with rows for the device, the folder, and the
+  summary line presented as if they were errors. Every compile-reporting action (blocks_read,
+  blocks_write auto-compile, hardware, technology_objects) now shows one row per actual
+  diagnostic, and the totals always match the compiler's own count. Any disagreement between
+  the listing and the count is printed, never hidden.
+- **The full message tree is still available.** get_compiler_messages renders every node,
+  hierarchy visible, nothing suppressed -- and the filtered views name that route in their
+  own output.
+
+## v3.41.4 (07-09-2026)
+- **The stored-credential list now says whether each one is for a project or global.** Two
+  credentials for the same PLC used to look identical, so deciding which to delete meant
+  guessing. Each row now states its scope, names the project it belongs to, and marks the one
+  that applies to the project currently open in TIA.
+
+## v3.41.3 (07-09-2026)
+- **The Credentials tab no longer writes progress messages to the log.** The diagnostics added
+  in v3.41.1 to track down the Add-dialog crash are switched off now that it is fixed. They can
+  be turned back on by setting `TIACOMMANDER_LOG_DEBUG=1`, should it ever be needed again.
+- Genuine failures are still logged, as before.
+
+## v3.41.2 (07-09-2026)
+- **The Credentials tab now says what the passwords are for** -- they are used by the live_data
+  tools when reading from a PLC.
+- **It also states what decides what.** Whether a password is needed comes from the CPU's
+  configured protection level, not its firmware version. Firmware decides the transport:
+  S7-1200 V4.5+ and S7-1500 V2.9+ connect over TLS, older CPUs connect in plaintext, and
+  `live_data connect` reports which was actually negotiated for the CPU in front of you.
+
+## v3.41.1 (06-09-2026)
+- **Fixed: adding a PLC password closed the Manager.** Clicking "+ Add" on a project row in
+  the Credentials tab terminated the application instead of opening the dialog. The dialog now
+  opens, and can be cancelled and reopened normally.
+- The Add path now writes progress to the log, so if it ever fails again the log says exactly
+  where. Passwords are never written to the log.
+
+## v3.41.0 (06-09-2026)
+- **PLC passwords can now be stored per project, not just globally.** A project's own
+  credential is tried first and a global one is used only as a fallback, so two machines
+  that share an IP no longer have to share a password.
+- **A new Credentials tab in the Manager** lists your projects and the PLC each one talks
+  to, shows which project is currently open in TIA Portal, and lets you add, view, replace
+  or delete a password without leaving the app. Archived copies are left out of the list,
+  and a Modified column tells apart several copies of the same project.
+- **Connecting to a PLC now explains what to do when it fails.** Instead of a generic
+  driver error, the reply says whether a password is needed, which stored credential was
+  used, or that a stored password was created on a different machine and must be
+  re-entered here.
+- A CPU that is read by absolute address is no longer told it is password-protected.
+- **Fixed: a failed installation reported itself as a PLC problem.** An incomplete update
+  produced an error that looked like the controller had refused the connection. It is now
+  reported as what it is, and the installer no longer leaves the files half-updated.
+- **Fixed: the Manager could close itself when the Credentials tab was used.** It appeared
+  to freeze and then vanish without a message.
+
+## v3.40.0 (30-08-2026)
+- **New `technology_objects` tool.** Fifteen actions covering listing and reading technology
+  objects, changing parameters, structural edits, export and import, and connecting an object
+  to its hardware.
+- `get_info` was under-reporting the available surface, listing one tool fewer than actually
+  shipped.
+- **Known issue found while testing:** compiling can silently downgrade a technology object's
+  version even when you did not touch it. Check the version of an axis after a compile.
+
+## v3.39.4 (26-08-2026)
+- **Fixed: calling a block whose input is itself a function block failed.** The parameter list
+  was built with duplicated entries, and TIA rejected the call with "the parameter list of the
+  call ... cannot be used". This affected both creating blocks and inserting rungs; only rung
+  insertion had been reported.
+
+## v3.39.3 (26-08-2026)
+- **Fixed: adding a network to a LAD block was refused if the block also contained SCL.** The
+  block's language was judged from one part of it rather than the block itself, so a LAD block
+  that happened to hold an SCL section was wrongly treated as SCL. Genuinely SCL blocks are
+  still refused, as before.
+
+## v3.39.2 (25-08-2026)
+- **Import actions now say up front that they replace the whole object.** Anything absent from
+  the file you supply is reset rather than left alone. This was already true; now
+  `udt import_xml`, `watch import_table` and both `blocks_write` import routes tell you so
+  before you run them.
+
+## v3.39.1 (25-08-2026)
+- **Fixed: a block's title, comment and header family/name were emptied by an overwrite that
+  never mentioned them.** They now survive, and there is a way to read them back so they can
+  be resupplied deliberately.
+
+## v3.39.0 (25-08-2026)
+- **Fixed: overwriting a block cleared block attributes you had set.** Settings such as the IEC
+  check flag were reset by an overwrite that never mentioned them. Attributes that older CPUs
+  reject are still left out on purpose.
+
+## v3.38.9 (25-08-2026)
+- **Fixed: an organization block asked for as a cyclic interrupt came back as a program cycle.**
+  It compiled and reported success, so the wrong block type was easy to miss. Overwriting an OB
+  without naming its type no longer reclassifies it either.
+
+## v3.38.8 (25-08-2026)
+- **Fixed: member attributes were lost when a data type was rebuilt.** The four boolean member
+  attributes are now captured before the rebuild and restored afterwards.
+
+## v3.38.7 (25-08-2026)
+- **Fixed: editing one UDT member reset the attributes of other members.** Updating a comment on
+  one member could clear another member's visibility, write protection and setpoint flags. Because
+  a UDT is a type, every data block and tag created from it inherited the change, including
+  re-enabling an HMI/OPC-UA write path that had been deliberately closed.
+
+## v3.38.6 (25-08-2026)
+- **Fixed: overwriting a block moved it out of its folder.** Creating a block in a target folder
+  always worked; it was the overwrite that dropped the placement.
+- Clarifies the previous release's note, which had wrongly reported creation as broken too.
+
+## v3.38.5 (25-08-2026)
+- **Fixed: overwriting a block silently discarded its number, memory layout and author.** A block
+  created as FC211 / Standard / with an author came back as FC9 / Optimized / no author when
+  overwritten without those arguments. All three now carry through.
+
+## v3.38.4 (25-08-2026)
+- **Fixed: overwriting a watch table created a duplicate instead.** The existing table in a folder
+  was never found, so an overwrite added a second table at the root under a modified name and left
+  the original in place, after which a later edit could reach the wrong one.
+
+## v3.38.3 (25-08-2026)
+- **Errors about a wrong argument type now name the argument.** Passing a number where text was
+  expected produced a raw .NET sentence that never said which argument was at fault.
+- Passing `null` for an argument now uses that argument's documented default instead of behaving
+  as if nothing was supplied.
+
+## v3.38.2 (25-08-2026)
+- **Fixed: `library get_tree` and `library find` ignored `depth`, `limit` and `typeFilter` when
+  they were supplied as text.** The result was the opposite of the request in a reply that looked
+  entirely successful: asking for six items could render thirty-five, because a dropped depth
+  means unlimited.
+
+## v3.38.1 (25-08-2026)
+- **Fixed: exporting block XML inline while the device was online failed with "Parse Error: Data
+  at the root level is invalid".** The real reason was replaced by a message about the error
+  message. This was the fourth export path with the same fault; the other three were fixed
+  earlier.
+
+## v3.38.0 (24-08-2026)
+- **New: `delete_scl_statement` removes a single SCL statement from a network**, instead of
+  requiring a whole network to be rewritten by hand.
+- **New: `split_network` divides one network into several.** Both were previously either
+  impossible or too risky to attempt against a live plant.
+
+## v3.37.0 (24-08-2026)
+- **Every block overwrite is now transactional.** The block is exported before the import and
+  restored automatically if the result does not compile, so a failed edit no longer leaves a
+  block inconsistent, a state that disables every other network-editing tool.
+- **New `get_edit_capabilities`** reports what can actually be edited for a given block.
+
+## v3.36.0 (21-08-2026)
+- **`create_block` now says which interface attributes the chosen route cannot carry.** Supplying
+  a member remanence on an SCL-based create silently dropped it and reported success. The note
+  names only what you actually supplied.
+
+## v3.35.0 (21-08-2026)
+- **A pin can now be left unwired**, by passing `null` for it in `pinWires`. Both obvious
+  spellings were previously rejected even though the underlying format supported it.
+
+## v3.34.0 (21-08-2026)
+- **`force=true` no longer lets an unusable operand through.** Forcing a dotted operand that
+  cannot resolve used to leave the block inconsistent with no repair path but deleting it.
+  `force` still does what it is for: accepting a single tag name that does not exist yet.
+
+## v3.33.0 (21-08-2026)
+- **A tag name containing a dot now explains how to write it.** Such tags always worked when
+  quoted; unquoted they were split and reported as undefined, and the refusal suggested a typo,
+  which led to the capability being reported as missing entirely.
+
+## v3.32.0 (21-08-2026)
+- **Fixed a regression present since v3.24.0:** `blocks_read export_xml_file`,
+  `blocks_read export_source` and `udt export_xml` refused the documented inline route, demanding
+  an `outputPath` they never read.
+
+## v3.31.0 (21-08-2026)
+- **Fixed: archiving a project or library could report "no file at expected path" for a file that
+  was still being written.** The result is now awaited briefly rather than checked once.
+
+## v3.30.0 (21-08-2026)
+- **An online-mode failure is no longer blamed on inconsistent blocks.** Every export error had a
+  "compile first" remedy appended, including errors that said in as many words that the device was
+  online. The message now names the device and tells you to go offline.
+
+## v3.29.0 (21-08-2026)
+- **A compile with warnings but no errors is no longer reported as a failure.** It now reads as
+  success and names the warning count, rather than hiding it.
+
+## v3.28.0 (21-08-2026)
+- **Live data: a symbol that appears on the PLC after a download is now found without
+  reconnecting.** The symbol list was read once per connection, so anything downloaded afterwards
+  stayed invisible. A miss now refreshes the list once and retries.
+
+## v3.27.1 (21-08-2026)
+- **Fixed `udt create` with `members[]`, `targetFolder` and `createParents`**, which v3.27.0
+  shipped broken on every path: supplying members failed outright, and the folder arguments were
+  accepted and silently ignored.
+
+## v3.27.0 (21-08-2026)
+- `udt create` accepts `members[]` plus `targetFolder`/`createParents`.
+- **Superseded by v3.27.1**: as shipped, this did not work on any path. Use v3.27.1 or later.
+
+## v3.26.0 (19-08-2026)
+- **A UDT member called `name` is no longer silently lost.** Adding one reported success and
+  then wasn't there. Reserved words are now quoted, as they already were for FB/FC/OB members.
+- `udt create` now says up front that it leaves a `_placeholder` member behind, instead of
+  only mentioning it afterwards.
+
+## v3.25.0 (19-08-2026)
+- **A single TRUE/FALSE value no longer makes a whole network read-only.** Networks containing
+  a Bool constant written by TIA itself reported as not editable, which switched off rung
+  editing for everything else in that network. They now read and edit normally.
+- Values TIA does not produce are still refused rather than guessed at, so a malformed
+  constant is reported instead of being silently reinterpreted.
+
+## v3.24.0 (19-08-2026)
+- **Leaving out a required argument now tells you which one.** Previously the error named the
+  tool, pointed you at the schema, and appended an internal .NET message ("The given key was
+  not present in the dictionary"). It now says exactly which argument is missing and lists
+  what the action accepts.
+- Calls that supply everything are unaffected, and actions the check does not cover behave
+  exactly as before.
+
+## v3.23.0 (19-08-2026)
+- **`create_block` can now create a block directly inside a folder** -- `targetFolder` and
+  `createParents`, the same arguments the other creation actions already take. Previously the
+  arguments were accepted and quietly ignored, and the block appeared at the root.
+- SCL blocks are the exception, and the tool now says so rather than silently rooting them:
+  they are created first and then moved, and moving requires the whole project to compile
+  cleanly. If the move cannot happen you are told the block exists, where it is, and what to
+  run next.
+- **Block numbers are no longer lost when creating an SCL block.** Asking for a specific
+  number gave you a different one; the number is now applied and verified, and overwriting a
+  block keeps its original number.
+- **Three actions stopped reporting success after a failed import.** `replace_network`,
+  `update_network_element` and rung edits (`update_rung`/`insert_rung`/`populate_network`)
+  each checked nothing before printing a success line -- rung edits even embedded the failure
+  text inside it.
+
+## v3.22.0 (18-08-2026)
+- **Master copies, library types and library folders can now be renamed** --
+  `library action=rename_master_copy`, `rename_type` and `rename_library_folder`. Renaming
+  a master copy does **not** rename the block or UDT inside it, and the result now says so
+  explicitly rather than leaving you to discover it.
+- Every rename reads the name back from the library before reporting success, so a rename
+  that silently did not take is reported as a failure instead of a success.
+- A `newName` containing `/` or `\` is refused. Names are addressed through
+  slash-separated paths, so a name containing one produces an item that cannot be
+  referenced afterwards.
+- `folders action=rename_folder` on technology objects was already working; only its
+  description said otherwise, which v3.21.0 corrected.
+
+## v3.21.0 (18-08-2026)
+- **Library types that wrap a UDT can now be instantiated.** Asking for one used to be
+  refused outright, with a message saying the capability was coming in a future update.
+  It was not coming, and it was not needed -- the UDT simply had to be created in *PLC
+  data types* rather than in *Program blocks*. Instantiating a master copy that wraps a
+  UDT works for the same reason; if neither route accepts it, both failures are reported
+  rather than one.
+- **Library folders can be created in the Types section.** `create_library_folder` and
+  `delete_library_folder` take `typeFilter=types|master_copies`. Every folder previously
+  landed under *Master copies*, with no way to say otherwise.
+- **The `delete_unused_types` preview now depends on the mode you asked for.** Both modes
+  used to print the same report, so "will be deleted" appeared next to types that
+  `preserve_default` keeps. The preview also gained a third outcome -- *likely skipped* --
+  for types nothing instantiates but something in the library still holds, and it now
+  lists the evidence each verdict rests on. Running the cleanup for real reports which of
+  its predictions actually happened.
+- **Global libraries can be cleaned up.** They used to be refused with "only available on
+  the project library", and the workaround that refusal suggested could not work. Removing
+  a whole type is still unavailable there and now says why; read-only and system libraries
+  are refused for what they are.
+- **`get_master_copy` returns a content list instead of a promise.** It used to say an XML
+  body would arrive in a later update. No such export exists for master copies, so it now
+  lists what the copy contains and states that master copies carry no dependencies --
+  publish referenced blocks and UDTs separately.
+- **A block version of `1.2.3` is refused instead of silently discarded.** It previously
+  reported success and left the block with no version at all. Block versions are
+  major.minor; library type versions are a different field and can have three parts.
+- **New: `library action=reload_global_library`.** Re-reads a global library changed
+  outside the session. It refuses while there are unsaved changes unless you say to
+  discard them.
+- `folders action=rename_folder` no longer claims renaming is impossible everywhere. It
+  works on technology objects; the message names the five containers where it does not.
+
+## v3.20.0 (18-08-2026)
+- The device name shown by `session list_devices` is now accepted everywhere. Previously
+  only the exact full name worked -- the shorter station name and the CPU name were
+  rejected as "not found", even though the tools display them.
+- When a shorter name is used, the result says which device it resolved to, so you are
+  never left guessing which PLC a command acted on. If a short name matches more than one
+  device, the call is refused and lists the candidates rather than picking one.
+- A device name that does not exist now lists the names that do, instead of only saying it
+  was not found -- and on the download path it no longer fails with an internal error.
+
+## v3.19.5 (18-08-2026)
+- Internal only: test records and verification. No user-visible change.
+
+## v3.19.4 (18-08-2026)
+- FIX (could close the wrong program): `session disconnect` with `closeTia` closed
+  whichever TIA Portal the API happened to list first, which is not necessarily the one
+  your session was using. With two TIA Portals open it could close a colleague's -- losing
+  their unsaved work. TiaCommander now remembers which instance it attached to and closes
+  that one, and the result names the process it closed.
+- If TiaCommander cannot tell which instance is yours and more than one is running, it now
+  refuses and closes nothing, rather than guessing. Reconnect with `session action=connect`
+  so the instance is recorded, or close TIA Portal yourself.
+- This was reachable only from v3.19.0, where `closeTia` given "true" or 1 started working.
+
+## v3.19.3 (18-08-2026)
+- Internal only: verification. No user-visible change.
+- Confirms that a tag's data type and address are stored exactly as supplied and are not
+  validated when set; a bad value is reported by the compiler, not at the time of writing.
+
+## v3.19.2 (18-08-2026)
+- Internal only: verification. No user-visible change.
+- Worth knowing: the live-data connection belongs to the session that opened it, so connecting
+  from one client does not make the connection available to another.
+
+## v3.19.1 (18-08-2026)
+- **Arguments that were accepted and then ignored now warn.** `add_interface_member` and
+  `update_interface_member` declared parameters their handlers never read, and that declaration
+  suppressed the very warning that would have told you the argument had no effect.
+
+## v3.19.0 (18-08-2026)
+- IMPORTANT: `session disconnect` with `closeTia` given as "true" or 1 previously did
+  NOTHING -- TIA Portal stayed open holding your project. It now closes TIA Portal, which
+  is what the parameter always said it would do. If you have been passing closeTia in that
+  form and relying on TIA staying open, this will change what happens.
+  Known limitation, being tracked separately: when several TIA Portal instances are
+  running, this closes the first one the API reports, which may not be the one your
+  session is attached to.
+- FIX (wrong PLC): `download_upload upload_station` with `addressIndex` given as a string
+  such as "2" silently used index 0 instead -- uploading a DIFFERENT physical PLC into
+  your project. `upload_check` then echoed your own value back, so there was no way to see
+  the substitution. Such a call is now refused before anything is uploaded.
+- FIX: `folders`, `watch`, `alarm_text`, `live_data`, `hardware` and `blocks_write`
+  arguments given the wrong kind of JSON value are no longer silently ignored. Where the
+  intent is unambiguous the value is accepted and the result tells you it was adjusted
+  (a number written as a string, a single item where a list was expected, a boolean
+  written as "true" or 1); otherwise the call is refused and names the parameter.
+- FIX (silent inversion): network flags such as `useRouter` given any string other than
+  "true" -- for example "yes" or "1" -- were written as FALSE without a word. They are
+  now either applied correctly or refused.
+- Note on scope: this release converts the arguments covered by the tracked defect list.
+  A number of other string arguments still behave as before.
+
+## v3.18.9 (18-08-2026)
+- **Fixed: a start value or comment given as a number or `true`/`false` was skipped, while the
+  result still reported the other changes it made**, a partial success that looked like a full
+  one. It is now refused and names the parameter.
+- **Fixed: hardware flags given as `0`/`1` had no effect** and the call failed complaining about
+  a missing parameter instead. Worse, any other spelling such as `yes` or `True ` with a trailing
+  space was written as **false** without comment. All are now handled or refused by name.
+
+## v3.18.8 (18-08-2026)
+- **Fixed: `tags` or `members` given as a single string polled the entire tag table or data block
+  instead of the item you asked for.** A bare string is now treated as a one-element list, with a
+  note saying so.
+
+## v3.18.7 (18-08-2026)
+- **Fixed: a single alarm entry supplied as one object created a text list with no entries at
+  all**, and the success message could not reveal it because its count came from the same empty
+  result.
+- **Fixed: `textListNames` given as a bare string exported every text list**, which sat in front
+  of a destructive round trip.
+
+## v3.18.6 (18-08-2026)
+- **Fixed: a watch modify or force value given as a number or boolean was silently skipped and
+  the old value survived.** It is now refused, naming the parameter.
+
+## v3.18.4 (18-08-2026)
+- **`depth` and `limit` given as numeric text now work** in `folders get_tree` and `folders find`,
+  with a note; genuinely invalid values are refused by name instead of producing a raw parser
+  error.
+- **Fixed: `typeFilter` given as an array was quietly turned into "all"**, so the filter you asked
+  for was never applied.
+
+## v3.18.3 (18-08-2026)
+- Internal only: shared argument-handling foundation for the fixes in the releases that follow.
+  No user-visible change.
+
+## v3.18.2 (18-08-2026)
+- FIX: creating a block with a `Constant` interface section works again. It previously
+  failed the import outright with "The attribute 'Remanence' cannot be set.", so the whole
+  block was rejected -- not just the constant. This is the known issue listed under v3.18.1.
+- A `Constant` member is a compile-time literal, so remanence does not apply to it and TIA
+  refuses the attribute. It is no longer emitted for that section. `Accessibility` is still
+  emitted, which is what TIA itself writes for constants.
+- No other section changes: `Input`, `Output`, `InOut` and `Static` members still carry
+  their remanence exactly as before, including an explicit `remanence` you pass in.
+
+## v3.18.1 (18-08-2026)
+- CHANGE: every interface member must now have a `name` and a `type`. Previously a member
+  missing its name was created as a variable literally called `unnamed`, and one missing
+  its type silently became a `Bool` -- neither of which you asked for, and both of which
+  compiled cleanly.
+- CHANGE: an unrecognised member key, or a section name that is not one of the six, is now
+  refused with the list of accepted names instead of being ignored. The message points out
+  the common mix-up: `create_block` calls the data-type key `type`, while
+  `add_interface_member` and `db.add_member` call it `dataType`.
+- These are the changes in this release most likely to reject a call that previously
+  appeared to work, which is why they are separate from v3.18.0. Section names remain
+  case-insensitive and a JSON `null` still means "not supplied".
+- Known issue, not introduced here: creating a block with a `Constant` section fails with
+  "The attribute 'Remanence' cannot be set." It is being tracked separately.
+
+## v3.18.0 (18-08-2026)
+- FIX (data loss, could destroy a live block): when you create a block, a section of the
+  `interface` given an object instead of an array silently lost every member in it. With
+  `overwrite=true` that replaced a LIVE function block's interface with an empty one, and
+  every instance data block lost its members with it. The call reported success and the
+  block compiled with 0 errors and 0 warnings. Such a call is now refused before anything
+  reaches TIA Portal.
+- FIX: `interface` given a string, or an array instead of an object, was ignored entirely
+  and the block was created with no interface at all -- again including when overwriting
+  an existing one.
+- FIX: a member's `startValue`, `comment`, `remanence` or `accessibility` given a number
+  or a boolean was dropped without a word, so a declared default that seeds every
+  instance data block simply disappeared. These are now refused, naming the parameter.
+  A start value is always a string: "33", "TRUE", "T#2S", "16#00FF" -- TiaCommander will
+  not guess which you meant from the JSON type.
+- FIX: a section that TIA Portal cannot hold on that kind of block -- `Static` on an FC,
+  or `Input` on an OB -- was discarded in silence. It is now refused by name, and the
+  message lists the sections that block type does accept. The documentation advertised
+  all six sections for every block type; it has been corrected.
+- Unchanged on purpose, so working calls keep working: section names are still matched
+  regardless of capitalisation, a JSON `null` still means "not supplied", an empty
+  section is still allowed, and a correctly formed interface behaves exactly as before.
+
+## v3.17.3 (18-08-2026)
+- CHANGE: a rung key that TiaCommander does not recognise is now refused, and the message
+  lists the keys it does accept. Previously a misspelling such as `contactss` or
+  `paralellBranches` was accepted and quietly ignored, so the block was built without
+  that part of your logic and still compiled cleanly. A key that differs only in
+  capitalisation is now named as such ("keys are case-sensitive, use 'contacts'").
+- This is the one change in this release that can reject a call that used to work. Four
+  things are deliberately still accepted: the `uids` block returned by `get_network`
+  (so read-modify-write round trips keep working), the keys of a `{type:'call', ...}`
+  rung, the keys of the rung-level `instruction` shorthand, and the older `name` / `tag`
+  / `bitTag` spellings inside contact and coil objects.
+
+## v3.17.2 (18-08-2026)
+- FIX (silent wrong behaviour): a LAD rung key given the wrong kind of JSON value was
+  ignored instead of refused, and the block still compiled with 0 errors and 0 warnings.
+  Three of these changed what the PLC would do:
+  - `contact` given an array dropped EVERY condition. Through `update_rung` that left
+    the coil connected straight to the powerrail -- an output that is permanently ON --
+    and the call reported success.
+  - a `parallelBranches` entry given a plain string deleted the whole OR branch, so
+    seal-in and manual-override logic disappeared.
+  - `negated` given the string "true" produced a normally-open contact instead of a
+    normally-closed one, inverting an interlock.
+- Forgiving where it is safe, strict where it is not. A shape that can be corrected
+  without guessing is now accepted AND reported back to you: `contact` given an array
+  becomes `contacts`, `output` given a plain operand string becomes a coil, `negated`
+  accepts true/false, "true"/"false" and 0/1. A shape that would require guessing is
+  refused with the exact JSON path -- `parallelBranches` is never guessed, because
+  ["#a","#b"] could mean two branches of one contact or one branch of two.
+- `output` and `coil` in the same rung is now reported as a conflict. Previously `coil`
+  quietly won and one of your two instructions was discarded.
+- A coil with nothing driving it is now refused with an explanation, instead of failing
+  with an internal TIA message quoting an element id that appears nowhere in your input.
+- Wrong-shaped values inside call rungs, boxes and coil objects are refused by name
+  rather than replaced with an empty string.
+
+## v3.17.1 (17-08-2026)
+- FIX (data loss): renaming a watch table could destroy it. If TIA rejected the new
+  name, the old table had already been deleted and was not put back. The result then
+  told you the original XML was preserved at a temp path -- and that file was deleted
+  immediately afterwards, so there was nothing to recover from. A failed rename now
+  RESTORES the table with its entries intact and says so. If a restore is ever
+  impossible, the backup file is kept, not deleted, and the message names it.
+- Note: TIA accepts more characters in a table name than you might expect (a slash, an
+  angle bracket, a trailing dot and very long names are all fine); a double quote is
+  rejected. Previously a rejected name cost you the table.
+
+## v3.17.0 (17-08-2026)
+- NEW: tag action=import_table imports a tag table from raw TIA XML -- the same
+  document export_tag_table_data format=xml produces. Accepts a file path, inline
+  XML, or an export ID straight from the export database. Requires offline mode.
+  With overwrite=true the existing table is backed up first and restored if the
+  import fails, and the result reports the measured tag count before and after
+  plus every tag that was dropped, so you are never asked to take the import's
+  word for what it did.
+- tag action=export_tag_table_data now registers every export in the export
+  database under the name of the table, so admin action=list_exports shows it and
+  get_export retrieves it. Previously an export wrote a file and list_exports
+  answered "No exports stored".
+- admin action=list_exports gained a Subject column naming what each export is
+  an export OF. Until now two exports of two different tables looked identical.
+- tag action=export_tag_table_data gained returnInline, which returns the content
+  instead of a path: XML and CSV as text, XLSX as base64.
+- FIX: exporting the same tag table twice within one second failed with "the
+  export cannot be made because the file already exists". The auto-generated name
+  is stamped to whole seconds, so the second export collided with the first. It is
+  now given a _2 suffix instead, and both files survive.
+- NEW: tag action=rename, which always refuses and explains why. TIA Openness
+  cannot rename a PLC tag, and it is not faked by deleting and re-adding: tag
+  names are global to the controller and nothing cascades, so the program would
+  keep referencing the old name with no way to repair SCL networks. Rename in the
+  TIA Portal IDE, which does cascade.
+- xref action=find_callers now documents what it could already do: it accepts a
+  PLC TAG name as well as a block name, and answers which blocks read or write
+  that tag, with Read/Write and the network. When a name matches no block and no
+  tag it now says so, instead of reporting that nothing references it.
+
+## v3.16.0 (17-08-2026)
+- NEW: tag action=move relocates a single tag between tag tables and keeps
+  everything -- its comment and all three access flags (accessible, visible,
+  writable). Until now there was no way to move one tag, so the only route was
+  delete plus add, and that silently reset all four. The move verifies by reading
+  the values back afterwards and reports a failure if anything did not survive.
+- tag action=delete_tag now REFUSES when the tag carries a comment or non-default
+  access flags, because add_tag cannot put them back. It names what would be lost
+  and points at action=move. Pass confirm to delete anyway. This also applies when
+  deleting several tags at once.
+- tag action=search now shows the Comment column, and prints "(none)" when a tag
+  genuinely has no comment. Previously comments were invisible here while other
+  actions showed them, so an empty result could not be told apart from a hidden
+  field.
+- The M/I/Q assignment list bit map was drawn in the opposite order to its own
+  column header, so every byte read mirror-imaged. Bit 0 now appears under the
+  "0" column.
+
+## v3.15.3 (17-08-2026)
+- Live data: when a symbol cannot be found, the message now says it is not in the
+  cached symbol set and suggests reconnecting, instead of stating that the symbol
+  is not declared in the PLC. The symbol list is captured once when the connection
+  is made, so after a download the tool could report a symbol as absent when it
+  exists on the PLC. The wording no longer claims to know something it cannot.
+- Documentation: corrected several statements about what the engineering API
+  supports. Notably, creating a data type inside a folder is only restricted for a
+  brand-new type -- one created from a library type or master copy lands in the
+  target folder directly. Folder rename limitations were also overstated.
+
 ## v3.15.2 (02-08-2026)
-- The published tool descriptions no longer carry internal research references. The text an AI client reads is tidied up; no tool, action or argument changed — descriptions only.
+- The published tool descriptions no longer carry internal research references. The text an AI client reads is tidied up; no tool, action or argument changed -- descriptions only.
 - Release packaging and third-party licence review: complete attribution (THIRD-PARTY-NOTICES.md and a licenses/ folder with the full text of every third-party licence) and a verified, minimal file set in the download.
 
 ## v3.15.1 (02-08-2026)
@@ -416,6 +956,9 @@ BREAKING CHANGES - one uniform container model everywhere:
 - Added: Mandatory version update notification -- when a newer version is available, the AI agent is instructed to inform the user with step-by-step update instructions before proceeding with any task
 - Added: Device cross-dimension tracking in telemetry -- device usage grouped by AI client for per-client error rate analysis
 
+## v2.30.0 (11-06-2026)
+- Internal only: finer-grained error reporting in usage telemetry. No user-visible change.
+
 ## v2.29.0 (10-06-2026)
 - Improved: Degraded mode now distinguishes between "TIA Portal not installed" and "TIA Portal installed but Openness API not enabled", providing tailored setup instructions for each case
 - Improved: Degraded mode detects and displays the installed TIA Portal version (e.g. V19) even when Openness is missing
@@ -424,17 +967,17 @@ BREAKING CHANGES - one uniform container model everywhere:
 - Added: Telemetry now tracks degraded mode sessions with reason codes for better install-experience analytics
 
 ## v2.28.0 (10-06-2026)
-- Added: `hardware action=dump_catalog` — dumps the full TIA Portal hardware catalog (~11,000 entries) to local database. Auto-detects TIA Portal version changes and re-dumps on upgrade
-- Added: `hardware action=search_catalog` — live real-time search of TIA Portal hardware catalog (requires TIA Portal running)
-- Added: `admin action=search_device_catalog` — offline search of locally cached hardware catalog by article number, type name, or description. No TIA Portal required
-- Added: `admin action=reset_device_catalog` — clears local catalog cache and triggers re-dump on next TIA Portal connection
-- Added: Device catalog telemetry — hardware catalog entries are included in telemetry data for aggregated device usage insights
-- Added: Per-project device catalog collection — walks project DeviceItems recursively to catalog all installed hardware modules
+- Added: `hardware action=dump_catalog` -- dumps the full TIA Portal hardware catalog (~11,000 entries) to local database. Auto-detects TIA Portal version changes and re-dumps on upgrade
+- Added: `hardware action=search_catalog` -- live real-time search of TIA Portal hardware catalog (requires TIA Portal running)
+- Added: `admin action=search_device_catalog` -- offline search of locally cached hardware catalog by article number, type name, or description. No TIA Portal required
+- Added: `admin action=reset_device_catalog` -- clears local catalog cache and triggers re-dump on next TIA Portal connection
+- Added: Device catalog telemetry -- hardware catalog entries are included in telemetry data for aggregated device usage insights
+- Added: Per-project device catalog collection -- walks project DeviceItems recursively to catalog all installed hardware modules
 
 ## v2.27.0 (10-06-2026)
-- Added: `session action=get_state` — proactive state check returning connection level (0-4), TIA/project/device status, license info, and restart flag. Call at session start for instant situational awareness
-- Added: Graceful state guards across all tools — instead of cryptic exceptions when TIA Portal is not connected or no project is open, tools now return clear guidance on what to do next
-- Added: Restart detection — if your license is activated or changes mid-session, every tool response includes a restart reminder so the AI assistant picks up the new tool set
+- Added: `session action=get_state` -- proactive state check returning connection level (0-4), TIA/project/device status, license info, and restart flag. Call at session start for instant situational awareness
+- Added: Graceful state guards across all tools -- instead of cryptic exceptions when TIA Portal is not connected or no project is open, tools now return clear guidance on what to do next
+- Added: Restart detection -- if your license is activated or changes mid-session, every tool response includes a restart reminder so the AI assistant picks up the new tool set
 - Improved: `session action=info` now includes state level and guidance for non-ready states
 - Improved: Server instructions updated to recommend `get_state` as the first call in every workflow
 
@@ -444,7 +987,7 @@ BREAKING CHANGES - one uniform container model everywhere:
 - Fixed: auto-update now preserves manifest.json and icon.png in MCPB extension directory
 
 ## v2.26.1 (26-05-2026)
-- Fixed: `open_manager` failing on fresh downloads with "The operation was canceled by the user" — Windows SmartScreen blocks shell-executed processes from internet-downloaded EXEs in headless mode
+- Fixed: `open_manager` failing on fresh downloads with "The operation was canceled by the user" -- Windows SmartScreen blocks shell-executed processes from internet-downloaded EXEs in headless mode
 - Fixed: SQLite database file leaking into release ZIP
 - Fixed: release notes encoding for non-ASCII characters (em dashes)
 
@@ -454,16 +997,16 @@ BREAKING CHANGES - one uniform container model everywhere:
 - New: runtime assembly resolver automatically discovers your TIA Portal installation via Windows registry, with filesystem fallback
 - New: startup log shows which TIA Portal installation was found and how it was discovered
 - Improved: release security gate now checks for accidental inclusion of proprietary DLLs
-- Retracted download assets from v2.14.1, v2.25.0, v2.25.5 — these releases contained proprietary Siemens DLLs that should not have been redistributed
+- Retracted download assets from v2.14.1, v2.25.0, v2.25.5 -- these releases contained proprietary Siemens DLLs that should not have been redistributed
 
 ## v2.25.5 (22-05-2026)
 - New: User Guide (`docs/USER_GUIDE.md`) -- covers Manager commands, auto-update workflow, and general usage
 - Updated CHANGELOG for v2.25.1-v2.25.4
 
 ## v2.25.4 (22-05-2026)
-- Fixed: self-update no longer aborts when the AI assistant keeps a headless MCP server process running — the updater now force-kills remaining processes after a 10-second grace period instead of aborting
+- Fixed: self-update no longer aborts when the AI assistant keeps a headless MCP server process running -- the updater now force-kills remaining processes after a 10-second grace period instead of aborting
 - Improved: update confirmation prompt now shows numbered steps explaining what will happen (download, close, replace, reopen, restart AI assistant)
-- Self-update pipeline tested end-to-end: v2.25.1 → v2.25.4 via GitHub Releases
+- Self-update pipeline tested end-to-end: v2.25.1 -> v2.25.4 via GitHub Releases
 
 ## v2.25.3 (22-05-2026)
 - Improved: update confirmation prompt lists step-by-step actions before proceeding
@@ -485,32 +1028,32 @@ BREAKING CHANGES - one uniform container model everywhere:
 ## v2.24.0 (17-05-2026)
 - Fixed: `export_io_map` now correctly maps I/O addresses to individual hardware slots on S7-1200 (previously all addresses landed on CPU slot)
 - Fixed: Digital I/O modules now show bit-level pinout (I8.0, I8.1, ...) instead of word-level addresses
-- New: `export_hardware_map` action — exports raw Siemens CAx/AML hardware data as a flat table (single sheet XLSX or CSV)
+- New: `export_hardware_map` action -- exports raw Siemens CAx/AML hardware data as a flat table (single sheet XLSX or CSV)
 - New filename convention for hardware exports: `{ProjectName}_{PLCName}_{ExportType}_{timestamp}.{ext}`
 - Tag names and comments are cross-referenced for every I/O address in the pinout
 
 ## v2.23.0 (16-05-2026)
-- New: `export_io_map` action on the hardware tool — exports a complete device I/O map combining rack/slot topology with tag assignments
+- New: `export_io_map` action on the hardware tool -- exports a complete device I/O map combining rack/slot topology with tag assignments
 - XLSX output includes one sheet per hardware slot plus a summary sheet with DI/DO/AI/AO/HSC totals
 - CSV output provides a flat combined view with all slots in one file
 - Supports single-device or all-device export (one file per device)
-- Every physical address is listed — unassigned addresses show blank tag name/comment
+- Every physical address is listed -- unassigned addresses show blank tag name/comment
 
 ## v2.22.0 (16-05-2026)
-- New: `open_file` action on the admin tool — opens any exported file using the Windows default application (Excel for .xlsx, browser for .html, etc.)
+- New: `open_file` action on the admin tool -- opens any exported file using the Windows default application (Excel for .xlsx, browser for .html, etc.)
 - Improved: all export actions now prompt to open the exported file after completion
 
 ## v2.21.0 (16-05-2026)
-- Fixed: stale TIA Portal handle no longer causes crashes when switching between launch/connect/create operations. Session create is now fully self-contained — auto-launches or attaches to TIA Portal and creates the project in one call.
+- Fixed: stale TIA Portal handle no longer causes crashes when switching between launch/connect/create operations. Session create is now fully self-contained -- auto-launches or attaches to TIA Portal and creates the project in one call.
 - Fixed: existing block numbers are preserved when updating blocks with overwrite. No more unintended OB number increments.
 - Improved: watch and force table entries now use data-type-appropriate display formats (Bool, DEC_signed, Float) instead of defaulting to Hex.
-- Improved: project create, archive, and library operations now default to configured root paths. No need to specify directories manually if configured via Manager → Paths tab.
+- Improved: project create, archive, and library operations now default to configured root paths. No need to specify directories manually if configured via Manager -> Paths tab.
 
 ## v2.20.0 (16-05-2026)
-- Comprehensive download configuration handling — 3-tier config handler covers all 30+ Openness download prompts (certificate trust, firmware mismatch, alarm text libraries, etc.) instead of only 7
+- Comprehensive download configuration handling -- 3-tier config handler covers all 30+ Openness download prompts (certificate trust, firmware mismatch, alarm text libraries, etc.) instead of only 7
 - Added `pcInterfaceName` parameter to `download_to_device` for explicit network adapter selection on multi-NIC PCs (VPN + WiFi scenarios)
 - Hardware downloads now auto-stop PLC modules (required for hardware configuration loading)
-- Firmware mismatch guidance in tool description — directs users to Online & Diagnostics to check actual PLC firmware version
+- Firmware mismatch guidance in tool description -- directs users to Online & Diagnostics to check actual PLC firmware version
 - Improved download error reporting with resolved interface and target address info
 
 ## v2.19.2 (16-05-2026)
@@ -534,7 +1077,7 @@ BREAKING CHANGES - one uniform container model everywhere:
 
 ## v2.18.2 (16-05-2026)
 
-- Block number auto-assignment: fbNumber, fcNumber, obNumber, blockNumber parameters now clearly documented as optional with auto-increment. AI agents no longer need to specify block numbers — the server assigns the next sequential number automatically.
+- Block number auto-assignment: fbNumber, fcNumber, obNumber, blockNumber parameters now clearly documented as optional with auto-increment. AI agents no longer need to specify block numbers -- the server assigns the next sequential number automatically.
 
 ## v2.18.1 (16-05-2026)
 
@@ -542,6 +1085,14 @@ BREAKING CHANGES - one uniform container model everywhere:
 - Fixed NORMALIZE instruction: default DestType changed from Int to Real (was causing import errors with Real inputs)
 - Fixed DECO/ENCO instructions: added required DisabledENO attribute and correct version numbers (V4.5+ firmware only)
 - Verified JUMP, JUMPNOT, SWITCH, JMPLIST instructions with cross-network label wiring on S7-1200 V3.0
+
+## v2.18.0 (15-05-2026)
+- **New: export your data to CSV or Excel.** Four new actions: `tag export_tag_table_data`,
+  `watch export_watch_data`, `watch export_force_data` and `alarm_text export_alarm_data`, with
+  auto-generated filenames.
+- **New default exports folder**, configurable in the Manager and reported by `get_info`.
+- Tag comments are included in exports, and watch and force lists cross-reference their comments
+  from the tag tables.
 
 ## v2.17.3 (15-05-2026)
 
@@ -551,11 +1102,11 @@ BREAKING CHANGES - one uniform container model everywhere:
 - Improved tool descriptions: documented instance DB requirements for R_TRIG, F_TRIG, TON, TOF, TP, CTU, CTD, CTUD; documented LAD rung formats in networks parameter
 
 ## v2.17.2 (15-05-2026)
-- Hardware tool: added guidance for new-project PLC setup workflow (network scan → identify by MAC address → assign IPs → configure connection → download)
-- Hardware tool: added V4.5+ firmware note — directs user to set protection level when compile fails with "Password must not be empty"
+- Hardware tool: added guidance for new-project PLC setup workflow (network scan -> identify by MAC address -> assign IPs -> configure connection -> download)
+- Hardware tool: added V4.5+ firmware note -- directs user to set protection level when compile fails with "Password must not be empty"
 
 ## v2.17.1 (15-05-2026)
-- `save_as` no longer requires an explicit directory — defaults to the configured projects root when `newParentDirectory` is omitted (consistent with `create` and `archive`)
+- `save_as` no longer requires an explicit directory -- defaults to the configured projects root when `newParentDirectory` is omitted (consistent with `create` and `archive`)
 
 ## v2.17.0 (14-05-2026)
 - Auto-update mechanism: type `update` in Manager terminal to check for new versions, view release notes, and install with one command
@@ -570,7 +1121,7 @@ BREAKING CHANGES - one uniform container model everywhere:
 - `get_info` now shows project count next to projects root path, matching the archives count format
 
 ## v2.16.1 (13-05-2026)
-- New action: `session action=list_archives` — list all `.zap*` archive files from configured or explicit archives root
+- New action: `session action=list_archives` -- list all `.zap*` archive files from configured or explicit archives root
 - Shows filename, size (MB), last modified date, and TIA Portal version per archive
 - Archives sorted newest-first; scans 1 level deep with 2-level fallback
 - `get_info` now shows archive count when archives root is configured
@@ -579,15 +1130,15 @@ BREAKING CHANGES - one uniform container model everywhere:
 ## v2.16.0 (13-05-2026)
 - Configurable default folders: set a TIA Portal Projects Folder and Archives Folder so you don't need to type full paths every time
 - New GUI folder pickers on the MCP Configuration tab in TiaCommander Manager
-- `session action=configure` — set `projectsRoot` and `archivesRoot` via MCP (validates directory exists)
-- `session action=create` — `parentDirectory` is now optional when a projects root is configured
-- `session action=open` — omit `projectPath` to list all available projects from the configured root (scans 2 levels deep)
-- `session action=archive` — `outputDirectory` is now optional when an archives root is configured
+- `session action=configure` -- set `projectsRoot` and `archivesRoot` via MCP (validates directory exists)
+- `session action=create` -- `parentDirectory` is now optional when a projects root is configured
+- `session action=open` -- omit `projectPath` to list all available projects from the configured root (scans 2 levels deep)
+- `session action=archive` -- `outputDirectory` is now optional when an archives root is configured
 - `get_info` now shows configured projects and archives root paths
 - Fixed: Show Terminal checkbox state now persists correctly across restarts
 
 ## v2.15.0 (12-05-2026)
-- New action: `hardware → set_network_config` — configure IP address, subnet mask, default gateway, PROFINET device name, IP protocol selection, ISO protocol, and station name on project devices
+- New action: `hardware -> set_network_config` -- configure IP address, subnet mask, default gateway, PROFINET device name, IP protocol selection, ISO protocol, and station name on project devices
 - PROFINET device name can be set directly (auto-disables auto-generation)
 - Station name (Device.Name) can be renamed, which controls PROFINET name when auto-generation is on
 - All changes require confirmation and download to PLC to take effect
@@ -635,7 +1186,7 @@ BREAKING CHANGES - one uniform container model everywhere:
 - Crash-safe error responses
 
 ## v2.9.1 (06-05-2026)
-- Terminal output sanitized — no sensitive data displayed
+- Terminal output sanitized -- no sensitive data displayed
 - Manager window always visible on launch
 
 ## v2.9.0 (06-05-2026)
@@ -785,7 +1336,7 @@ BREAKING CHANGES - one uniform container model everywhere:
 
 ## v0.2 (10-11-2025)
 - Session management: connect, disconnect, open/close projects, list devices
-- TIA Portal V15.1–V19 compatibility
+- TIA Portal V15.1-V19 compatibility
 
 ## v0.1 (25-10-2025)
 - Initial release: MCP server architecture (JSON-RPC 2.0 over stdio)

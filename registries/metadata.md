@@ -2,7 +2,7 @@
 
 **Name:** TiaCommander
 **One-liner:** MCP server that connects AI assistants to Siemens TIA Portal via the Openness API
-**Description:** AI-assisted PLC programming, project management, library operations, hardware configuration, cross-reference analysis, and deployment for Siemens TIA Portal. 16 tools, 166 actions covering the full TIA Portal project lifecycle. Tested with Claude Desktop, Claude Code, VS Code (Copilot), Cursor, Windsurf, Codex CLI, Gemini CLI.
+**Description:** AI-assisted PLC programming, project management, library operations, hardware configuration, cross-reference analysis, and deployment for Siemens TIA Portal. 19 tools, 230 actions covering the full TIA Portal project lifecycle. Tested with Claude Desktop, Claude Code, VS Code (Copilot), Cursor, Windsurf, Codex CLI, Gemini CLI.
 **Category:** industrial-automation
 **Tags:** siemens, tia-portal, plc, industrial-automation, openness-api, scl, lad
 **Transport:** stdio
