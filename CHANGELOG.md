@@ -2,6 +2,890 @@
 
 All notable changes to TiaCommander are documented here.
 
+## v3.46.0 (19-11-2026)
+Highlights since the last public release (v3.42.0); every change is listed under its own version below.
+- **New: know-how protection for PLC blocks.** Protect and unprotect blocks, with passwords stored encrypted by Windows on this PC and a new Block protection tab in the Manager. Tools refuse to change a protected block or data type before anything is touched.
+- **New: the tool set follows your licence live.** Tools appear or drop in the same session when a licence refreshes or changes, and the Manager has a Logout button.
+- **Fixed: data types (UDTs) with nested Structs.** They are read and edited correctly, start values stay on their own member, and nested members can be addressed by path (e.g. AxisX.Home).
+- **Fixed: names containing '/' work everywhere,** and an ambiguous name is refused, never guessed.
+- **Fixed: devices inside device groups** are listed, counted, compiled and can be named in every tool. I/O addresses are reported on the module that owns them.
+- **Changed: texts follow the project's editing language.** Block, network, member, tag, watch-table and text-list comments are written in it and other translations are kept.
+- **Changed: safer edits.** Every block, data type, DB, tag, watch-table and text-list write is checked after it lands; on a mismatch the original is put back and the reply says so.
+- **Fixed: TiaCommander no longer starts a second TIA Portal** when one is already running.
+- **Fixed: stored licence data and PLC passwords stay readable after a Windows update.**
+- **Fixed: many reports from GitHub,** including LAD/FBD blocks with absolute addresses, Retain on the SCL route, library types that need their PLC data types, and bulk calls.
+- **Licensing: internal robustness improvements.**
+
+## v3.45.6 (19-11-2026)
+- **Fixed: stored licence data and PLC passwords could become unreadable after a Windows update.** The machine ID that protects them is now worked out once and kept, so a Windows update or a brief hardware-read hiccup can no longer change it. Existing installs keep their current ID and stay readable.
+
+## v3.45.5 (03-11-2026)
+- **Fixed: clipped text in the Manager.** The hint in the dialog that shows a stored password is shown in full, and so is the description on the Block protection tab.
+
+## v3.45.4 (03-11-2026)
+- **Fixed: know-how passwords of a block with a slash in its name.** A block named `Motors/Pump` and the block `Pump` in the folder `Motors` now keep separate stored passwords. Before, storing one replaced the other, so the first block's unprotect was refused. In the password list, a path part that contains a slash is shown in double quotes.
+
+## v3.45.3 (03-11-2026)
+- **Changed: know-how protected data types are status only.** Tools no longer tell you to remove a data type's protection in TIA Portal, because Portal V19 offers know-how protection for blocks only. A protected data type is still detected and refused. (gh#17)
+
+## v3.45.2 (03-11-2026)
+- **Changed: know-how passwords are now encrypted by Windows (DPAPI) on this PC** and no longer depend on the machine ID, so a machine ID change cannot make them unreadable while a block stays locked. Another PC or a Windows reinstall cannot read them; such an entry is reported as unreadable, no other stored password is tried, and an explicit password replaces it. (gh#17)
+
+## v3.45.1 (03-11-2026)
+- **New: Manager "Block protection" tab.** Add, view, replace and delete know-how passwords per block, per project or global, the same way as PLC passwords. "Show previous" lists replaced passwords, which you can view, restore or permanently delete. (gh#17)
+
+## v3.45.0 (03-11-2026)
+- **New: know-how protection for PLC blocks.** `blocks_write` gains `protect` and `unprotect` (one block or a list), and `blocks_read` gains `get_protection` and `list_protected` (blocks and UDTs; a UDT is status only, Openness can neither protect nor unprotect it). (gh#17)
+- **New: stored know-how passwords.** `set_protection_password`, `delete_protection_password`, `restore_protection_password` and `list_protection_passwords` keep passwords encrypted by Windows on this PC, per block, per project or global. `protect` saves the password it uses before it locks the block, so a lock can't lose it; replaced or deleted passwords stay in a restorable history until you delete them for good.
+- **Changed: passwords stay out of logs.** Argument values not registered for an action are masked before the debug log, the activity log and telemetry.
+
+## v3.44.74 (02-11-2026)
+- **Changed: tools refuse to change a know-how protected block or UDT, before anything is touched.** Edits, overwrites, imports over a protected block, delete, rename, move, copy and delete_folder with its contents now reply that the object is protected and how to remove the protection. Reading its interface still works. (gh#17)
+- **Changed: exports of a protected block say what they are.** export_xml_file, export_xml_inline and export_all_xml give the public interface only, with a note saying so; export_source refuses. An interface-only export is never used as an overwrite backup.
+- **Fixed: a DB member edit could trigger a whole-PLC compile on reply text alone.** The compile and retry now run only when TIA itself refuses the export as inconsistent.
+
+## v3.44.73 (02-11-2026)
+- **Internal: encrypted store for know-how protection passwords** (no new tool yet). A password that cannot be read on this PC is reported as unreadable, never used. (gh#17)
+
+## v3.44.72 (02-11-2026)
+- **Fixed: network and statement edits no longer fail because a different block is inconsistent.** add_network, update_network, split_network, delete_scl_statement and update_network_element: when TIA refuses the export for that reason, the target block is compiled once and the export is retried. If the target block has compile errors of its own, the edit is refused and those errors are named. (gh#18)
+- **Fixed: create_block with overwrite=true on a new name refuses a block number another block already holds.** Overwriting a block of the same name still keeps its number. (gh#25)
+- **Changed: empty title and comment items are no longer written when a block or network is created without them** (create_block XML route, add_network, split_network, create_fb / create_fc / create_ob). DB templates are unchanged. (gh#13)
+
+## v3.44.71 (28-10-2026)
+- **Fixed: TiaCommander no longer starts a second TIA Portal when one is running.** session open, create, connect and
+  launch now look at the running TIA Portal processes first: with one TIA Portal running they attach to it ('Attached
+  to running TIA Portal (PID n)'), and launch says so instead of starting another one. When they cannot tell which
+  instance to use, or TIA Portal runs but Openness cannot reach it, they refuse at once with the reason and the way out
+  - never a wait, never a hidden second instance: several instances -> each PID with its open project and 'retry with
+  pid=<n>'; another TIA Portal version than the bound one -> says which version and how to select it; anything else ->
+  'TIA Portal is running (PID n) but Openness cannot attach to it' with the common causes. Background helper processes
+  of TIA Portal are never mistaken for a running instance.
+- **New: session launch forceNew=true** starts a second TIA Portal instance explicitly - the only way to get one.
+- **New: pid selects the TIA Portal instance** for session connect, open and create when several run. session open
+  also picks, by itself, the one instance that already has the requested project open.
+- **Fixed: session disconnect closeTia=true after session launch** closes the TIA Portal this session started (launch
+  now records its process id) instead of refusing with AmbiguousTarget.
+- **Improved: the state hints no longer suggest session launch while a TIA Portal is running** - get_state, get_info
+  and the 'not connected' guard of every tool point to session connect instead.
+- **Fixed: open_manager recognises an already running Manager (gh#29).** It checks the Manager's own single-instance
+  lock instead of the process name, so another AI client's TiaCommander server no longer makes it answer 'Manager is
+  already running' while no Manager window is open.
+
+## v3.44.70 (28-10-2026)
+- **Fixed: create_block (SCL) with a member set to remanence=NonRetain is created.** NonRetain is written as a plain
+  declaration (the default on an optimized block); the previous build wrote a NON_RETAIN keyword that TIA rejects, so
+  the block was not generated. Retain is unchanged (VAR RETAIN).
+
+## v3.44.69 (28-10-2026)
+- **Fixed: LAD / FBD blocks with absolute addresses compile (gh#28).** Contacts, coils, box pins and every other operand
+  written as an absolute address - %I0.2, %Q1.0, %M101.0, %MW10, %ID4, %DB10.DBX0.0, %DB10.DBW2 - are now created as
+  addresses instead of as a tag named '%I0' (TIA's 'Tag "%I0"."2" not defined'). An operand that starts with '%' but is
+  not one of these forms is refused with the list of supported forms, never written as a broken tag. Networks that hold
+  such addresses can also be read back and edited with the rung tools, and a box pin can be rewired to an absolute address with update_network_element.
+- **Fixed: a library FB / FC that needs its PLC data types instantiates and is consistent (gh#19).** library
+  instantiate_library_type now creates the PLC data types the block's library version depends on first - at exactly the
+  version it depends on, unless a type of that name is already in the PLC - and compiles the new block once when TIA
+  reports it inconsistent. The reply lists each dependency (created or already present). When the block cannot be
+  created after its data types, they are removed again and the block is created the way it was before, with a warning.
+- **Fixed: Retain survives the SCL route (gh#15).** create_block (SCL) writes remanence=Retain / NonRetain into the
+  block (VAR RETAIN for FB and DB members of Input / Output / InOut / Static on an optimized block; NonRetain is the
+  default there and is written as a plain declaration),
+  and an overwrite through the SCL route now keeps the members' External accessible / visible / writable and Setpoint
+  flags and the block's own attributes, verified like the LAD / FBD route (a carry that does not verify restores the
+  original block). The 'not applied' note now names only what is still not applied.
+- **Fixed: blocks_read export_xml_file and export_source overwrite the file at outputPath (gh#30).** A second export
+  to the same path no longer fails on the existing file (the stale-file trap in the report); the reply says when an
+  existing file was overwritten.
+- **New: session action=get_languages (gh#30)** - read-only: the open project's languages, active languages, editing
+  language and reference language, as culture names. Needs an open project, no device.
+- **Fixed: hardware search_catalog and dump_catalog work in a project without devices (gh#30)** - they need only a
+  connected TIA Portal now; every other hardware action still needs a device.
+- **Improved: the log carries the full cause of an Openness error, and TIACOMMANDER_LOG_DEBUG is documented (gh#30).**
+  Failed Openness calls (imports, exports, source generation, library instantiation, and any tool error) are logged
+  with every inner exception and its stack trace, not only TIA's generic 'Error when calling method ...' text; library
+  instantiate_library_type replies with the inner cause, and its 'unique per device' hint appears only when that is the
+  cause. README: where the logs are and how to turn on debug logging (TIACOMMANDER_LOG_DEBUG=1).
+
+## v3.44.68 (28-10-2026)
+- **Fixed: an edit is no longer refused or rolled back because ANOTHER block has compile errors (gh#18 remainder).**
+  db member edits (add_member / add_members / update_member / delete_member(s) / set_start_values) that recompile after
+  an export inconsistency, db get_member and diagnostics snapshot_read now judge only their own DB: compile errors that
+  belong to other blocks are named in a NOTE and no longer stop the edit or the read. move_block and the create_block
+  SCL route with targetFolder do the same for their block. Every overwrite that verifies by compiling - network and
+  member edits, blocks_write import_xml_file / import_xml_inline with overwrite, the create_block overwrite (SCL and
+  XML, incl. its carried attributes) and the db edit compile check - now rolls back only when the edited block itself
+  has compile errors (a guard: the reported rollback of a good edit could not be reproduced on the test bench). The
+  reply says 'Verified: 0 error(s) in '<block>' itself' and names any other objects' errors in a NOTE. Restores after
+  a failed edit or move are judged the same way.
+- **Fixed: move_block never reports a plain success for a block that does not compile.** The moved block's own
+  compile result is read; a block with compile errors of its own is flagged with a WARNING (the move itself is kept and
+  verified), errors in other blocks are only named.
+- **Fixed: create_block (SCL) with targetFolder reports a compile failure as such.** A created block that does not
+  compile is left at the block root with its compile errors listed, instead of a misleading move / export failure.
+- **Fixed: udt move keeps the data types and blocks that use the moved UDT consistent (gh#31).** After the move every
+  UDT and block that uses it (directly or through another UDT) is recompiled, so e.g. a UDT that contains the moved UDT
+  can be exported straight away without a manual compile_all. The reply names the dependents recompiled, or warns with
+  any that still have compile errors of their own; a compile error elsewhere in the project never turns a landed move
+  into a failure.
+- **Fixed: udt import_xml overwrite=true works for a UDT in a subfolder and is protected (gh#22).** The UDT is replaced
+  in its own folder (no more 'fully qualified name already exists'), a backup is taken first, the result is verified
+  (found in place and compiling) and a failed verify is rolled back from the backup. overwrite=false on an existing UDT
+  is refused before any change, as before. The same applies to the xmlContent and exportId forms.
+- **Fixed: blocks_write import_xml_file / import_xml_inline with a PLC data type document (gh#22)** import it as a UDT:
+  targetFolder names a folder of PLC data types (createParents creates it there), not a Program blocks folder.
+- **Improved: an overwrite import of an inconsistent block takes a backup when it can (gh#30).** The target is compiled
+  once first; if it then exports, the overwrite is protected by a backup. A target that still cannot be exported is
+  imported as before, with the no-backup warning (an import is never refused for that).
+- **Clearer move failure hint (gh#30).** When udt move, tag move_table or watch move_table cannot export the item
+  because it is inconsistent, the reply now says to compile first (blocks_read action=compile_all) and retry; the UDT
+  export paths use the same hint.
+
+## v3.44.67 (28-10-2026)
+- **Fixed: names containing '/' now work everywhere (gh#24).** A block, PLC data type, tag table, watch table, library
+  type or master copy whose name contains '/' (e.g. 'EtherNet/IP') is found by that name - it is no longer read as a
+  folder path and reported as not found. One pair of surrounding quotes and '\' for '/' are still accepted, and
+  'Folder/Name' still finds an object in a folder.
+- **An ambiguous name is refused, never guessed.** When a name matches more than one object (for example a block named
+  'Motors/Pump' at the root and block 'Pump' in folder 'Motors'), the reply lists every candidate with its folder and a
+  selector that picks exactly that one: `literal:<name>` (the exact name in any folder), `path:<folder>/<name>` (a
+  folder segment that itself contains '/' in double quotes, e.g. `path:"Line/1"/Pump`) or, for blocks,
+  `number:FB12`. Every name argument accepts these selectors. This holds for move_block and copy_block and for the
+  block actions that used to answer such a name with 'not found' (rename, title / comment, networks, calls, DB delete,
+  instance DB create, library publish, multi-instance members), and for udt action=move, tag move_table and watch
+  move_table, which now also accept 'Folder/Name' and the selectors.
+- **Fixed: UDT edits and tag table imports / moves never act on a look-alike.** A UDT edit or create re-reads its type
+  by its exact name, so a UDT named 'A/B' is backed up and verified even when a UDT 'B' sits in folder 'A' (before, the
+  edit could run with no backup and then report the type as not found). tag import_table reads the table name in the
+  XML as an exact name and refuses, with NO changes applied, when that name cannot be resolved cleanly; tag move
+  re-reads both tables by their exact names.
+- **Fixed: a create, move or copy never touches another block with a similar name.** The clean-up after TIA refuses a
+  new block, the checks after a move or copy, and their compile steps look the block up by its exact name. Before, an
+  unrelated block 'Pump' in folder 'Motors' could be deleted when a block named 'Motors/Pump' was created or moved.
+- **Fixed: auto-compile after an import uses the imported block itself (gh#24).** import_xml_inline / import_xml_file
+  compiled a block whose name was read back out of the reply text - a name containing ' (' was cut short and another
+  block was compiled. The compile now uses the block the import returned; create_fb / fc / ob and create_block do the
+  same.
+- **Fixed: block, UDT and table names with '/' or ':' no longer break temporary and export files** (interface edits,
+  XML edits, moves, copies, backups, export_source, export_all_xml).
+- **Fixed: create_fb / create_fc / create_ob / create_block with a '/' in the name** check for an existing block by
+  that exact name and create it under that name - they no longer switch to another creation route or look at a block
+  in a folder.
+- **Fixed: an OB created from the default template no longer carries the title with literal quotes (gh#25)** - the
+  title is Main Program Sweep (Cycle).
+
+## v3.44.66 (28-10-2026)
+- **Fixed: bulk calls were refused for a "missing" single-item argument (gh#26).** tag add_tag / delete_tag, udt and
+  db add_member / delete_member and blocks_write add_multi_instance_member now accept the array form alone (tags[],
+  tagNames[], members[], memberNames[]) - an empty array still counts as missing. udt create, udt add_member and db
+  add_member accept each member item as {memberName, dataType} or {name, dataType}.
+- **Clearer action and argument texts (gh#29).** Every action's argument list now says which arguments are required,
+  which are alternatives and which are optional, with the real defaults; error and hint texts no longer name actions
+  that do not exist; every "unknown action" reply lists exactly the actions the tool offers. A missing required argument
+  names the action that lists valid values for it, and a missing confirm names the exact phrase to pass.
+- **Fixed: alarm_text add_entries / update_entries without entries[] (and delete_entries without fromValues[]) are
+  refused naming the argument** instead of running and reporting "0 entries added".
+- **Fixed: blocks_write import_xml_inline without xmlContent is refused naming xmlContent** instead of failing with an
+  internal error.
+- With more than one AI client attached, library delete_unused_types without dryRun is a preview again (it never
+  deletes without dryRun=false), so it no longer asks for the multi-client confirmation.
+
+## v3.44.65 (27-10-2026)
+- **Fixed: usage statistics and licence checks could fail with "Could not create SSL/TLS secure channel" when
+  TiaCommander was started through another program.** HTTPS calls now always use TLS 1.2 or 1.3, whichever program
+  starts TiaCommander. A normal installation was not affected and behaves exactly as before.
+
+## v3.44.64 (27-10-2026)
+- **Fixed: usage statistics stopped reaching the TiaCommander service after an error text contained a control
+  character.** An error message that quotes an invisible character (for example TIA's "Invalid XML ... hexadecimal
+  value 0x01") was sent unescaped, the service rejected the whole report, and because a failed report is retried with
+  the same content, no later report got through either. Every such character is now escaped, so the next report goes
+  through and carries the backlog. The licence check and the Manager's registration form use the same escaping (a tab
+  pasted into a name no longer breaks registration). A failed network send now logs its cause.
+
+## v3.44.63 (24-10-2026)
+- **Fixed: on a modular S7-1500 the device's order number is the CPU's, not the rail's - live_data no longer refuses
+  a correct CPU as a different device (gh#11).** live_data read_tag_table / read_watch_table compare the named
+  project device with the CPU they are connected to. The project side took the first module carrying an order
+  number, which on a modular S7-1500 is the mounting rail (6ES7 590-...), so a connection to the right CPU was
+  refused with "DeviceMismatch". The check now uses the CPU module's order number; S7-1200 and other devices keep
+  the order number they reported before.
+
+## v3.44.62 (24-10-2026)
+- **Fixed: I/O addresses are reported on the module that owns them (gh#20).** hardware get_device, get_full_config,
+  get_rack_slot_details and get_io_map listed every I/O range of the PLC's IO system on the CPU line - the ranges of
+  the CPU's own signal modules, of ET 200SP stations and of GSD devices - and left the modules themselves without an
+  address. Each range now appears on its own module (or GSD submodule), written exactly from start bit to end bit
+  (I10.0-I11.7; several joined by "; "), and get_io_map lists one row per range for every device, including devices
+  in device groups and in "Ungrouped devices". The devices CSV / XLSX export has one row per range (IoType,
+  StartByte, StartBit, LengthBits, Address) and still lists a device that has no address.
+- **New: get_io_map takes a deviceName and get_rack_slot_details a slot filter (gh#20).** Omit them for the full
+  view as before; an unknown or ambiguous deviceName is refused like in every other tool, and a slot the device does
+  not have is an error that lists the device's slots.
+- **Fixed: get_assignment_list / find_next_free count I/O devices on the PLC's IO system.** Hardware rows now name
+  the device and module that occupy each byte ("HW: ET200SP_1/DI_1") instead of the CPU, devices on another PLC's IO
+  system are not counted, and find_next_free never hands out an address an IO device already uses.
+
+## v3.44.61 (24-10-2026)
+- **Fixed: devices inside device groups can now be named in every tool (get_device, compile_device, set_network_config,
+  get_plc_status, exports ...) (gh#21).** A device in a device group or in "Ungrouped devices" was listed since the last
+  release, but naming it in a tool still answered "not found". Every tool that takes a deviceName now finds it, and
+  also accepts the group path (Group_A/Sub_B/Device), the station name, the PLC software name and the head-module
+  name; a name that fits several devices is refused with the candidates and where each one lives, and a name that
+  fits none lists every device with its group and head module. hardware get_full_config shows every device;
+  export_io_map and export_hardware_map without a deviceName export every device; get_assignment_list and
+  find_next_free keep the hardware I/O rows when the device was named by an alias. When a name was resolved to a
+  device and the call then failed, the error reply now says which device it meant. compile_device refuses an
+  ambiguous name instead of compiling a station that merely holds an item of that name.
+
+## v3.44.60 (24-10-2026)
+- **Fixed: devices inside device groups and in "Ungrouped devices" are now listed, counted, compiled and exported
+  (gh#21).** Until now these tools saw only the devices at the top level of the project tree. session list_devices
+  now lists every device and shows where it lives ("Group: Group_A/Sub_B", "Group: Ungrouped devices") and the name of
+  its head module ("Head module: ..."); session get_project, get_state and open count every device;
+  a project whose devices are all inside groups is no longer reported as "Project has no devices"; hardware
+  compile_all compiles grouped and ungrouped stations too; the devices CSV / XLSX export has their rows;
+  hardware get_network lists their network interfaces; library update_project and delete_unused_types (dry run)
+  also look inside PLCs that sit in a device group (a type used only there is no longer reported as unused); the
+  live_data PLC address list and the scan's project IP map include them; the check that refuses to save while a
+  device is online covers them too. Looking a grouped device up by name in the other tools follows in the next release.
+
+## v3.44.59 (24-10-2026)
+- **Internal groundwork for device groups (no behaviour change).** TiaCommander gains one shared component that
+  sees every device of a project - top-level devices, devices inside device groups (nested to any depth) and
+  "Ungrouped devices" - and resolves a device by its name, its group path (for example "Group_A/Sub_B/PLC_Station"),
+  its station name, its PLC name or its head-module name, refusing ambiguous names with the candidates listed. No
+  tool uses it yet; the following releases move the tools onto it so grouped and ungrouped devices stop being
+  missed. At startup, a TIA Portal Openness version without device-group support is now reported as incompatible
+  instead of silently listing only part of a project's devices.
+
+## v3.44.58 (19-10-2026)
+- **Fixed: create_block with overwrite failed for an existing SCL block ("Access to a disposed object").** In a
+  project with more than one language, overwriting an existing SCL block (create_block language=SCL
+  overwrite=true) was refused with "Access to a disposed object of type ...FC" and the original block was put
+  back unchanged. The overwrite now completes: the new code is kept, the block title and comment keep their
+  other languages, and the reply names the language written. No released version was affected: the error came
+  with the language carry added in v3.44.53 (never deployed); v3.44.45 and earlier do not run that step.
+
+## v3.44.57 (19-10-2026)
+- **Fixed: create_block with overwrite=true reported that the block title and comment were kept in every
+  language even when no block of that name existed.** The call then simply creates the block, and the reply now
+  says so ("no block named ... existed, so it was created new"). When the block does exist, the reply says that
+  its title and comment were kept and read back. If that read-back differs, the call fails and names where the
+  copy of the block from before the overwrite was kept.
+- **Changed: the create_block reply names the language it wrote in the same form as the other write replies**,
+  for example "Texts: title, comment and member comments written (culture de-DE)."
+
+## v3.44.56 (19-10-2026)
+- **Fixed: interface member comments, library texts and network titles were shown empty when only the project's
+  editing language had text, or showed another language's text instead.** get_interface (member comments),
+  library get_type (the type comment) and get_network / get_edit_capabilities (network title and comment) now
+  show the text of the project's editing language. When that language has no text, they show the first language
+  that has text, marked with its language (for example "[en-US] Motor on"). A library type comment no longer
+  prefers en-US; with no project open, the first language that has text is shown, marked. The expectTitle check of
+  the rung edits compares the title text without that marker.
+
+## v3.44.55 (19-10-2026)
+- **Fixed: blocks created from the built-in templates (create_fb, create_fc and create_ob in LAD or FBD or with a
+  target folder, db create with a Standard memory layout or a target folder, and the template fallback of every
+  SCL create) still carried en-US texts.** Their block and network title and comment items, and an OB's input
+  comments, are now created in the project's editing language, so a project edited in another language no longer
+  gets en-US entries, and a project without en-US no longer refuses the create with "Cannot import multilingual
+  text with culture en-US". The reply names the language written. When the editing language cannot be read the
+  create is refused before anything is changed.
+
+## v3.44.54 (19-10-2026)
+- **Fixed: adding a force table entry without a comment failed.** TIA Portal refused the import with "The value of
+  attribute 'Comment text' contains an invalid character at Position 0", because the empty comment was saved with
+  a line break inside it. The same affected watch table entries added without a comment, and clearing an entry's
+  comment, modify value or force value with update_entry. An empty value is now saved as empty.
+
+## v3.44.53 (19-10-2026)
+- **Fixed: blocks, OB inputs and networks were created with texts in en-US instead of the project's editing
+  language; on a project without en-US they were refused (gh#13).** create_block (title, comment, member
+  comments and the Initial_Call / Remanence comments of a program-cycle OB), add_network (single and bulk) and
+  split_network now write their texts in the project's editing language. An empty title or comment is created
+  as an empty text in that language. Every reply names the language it wrote. When the editing language cannot
+  be read, the call is refused before anything is changed.
+- **Fixed: overwriting a block with create_block lost the block title and comment in the other languages.** An
+  overwrite now keeps the block title and comment in every project language: a title or comment you supply
+  replaces only the editing-language text, one you leave out is kept as it was in all languages. The texts are
+  read back after the overwrite. If the old title and comment cannot be read first (for example because the
+  block does not compile), the overwrite is refused and nothing is changed. Network titles and comments and
+  interface member comments are still replaced by an overwrite, and the reply says so.
+- **Changed: update_network and replace_network now change only the editing language, and an empty value
+  clears.** A title or comment now updates (or adds) the text of the project's editing language and leaves the
+  other languages untouched; before, it overwrote whichever language came first. Passing an empty title or
+  comment ("") now clears that text in the editing language instead of being ignored; leaving the argument out
+  keeps the text unchanged. split_network renames the first network in the editing language the same way.
+
+## v3.44.52 (19-10-2026)
+- **Fixed: watch and force table entry comments were written in en-US and read back empty when only the editing
+  language had text.** Adding or updating a watch or force table entry now writes its comment in the project's
+  editing language and leaves the comment's other languages as they were; the reply names the language written.
+  Reading entries (get_entries) shows the editing-language comment, or the first language that has text, marked
+  with its language (for example "[en-US] Motor on"). The CSV and XLSX exports carry the comment text without that
+  marker. A new comment on an entry that had none is written with valid IDs, and the watch comment description no
+  longer recommends ASCII.
+
+## v3.44.51 (19-10-2026)
+- **Fixed: create_textlist without a comment failed on projects with more than one language.** Since v3.44.49,
+  creating a text list with entries but no comment was rejected by TIA Portal ("No valid language was found for
+  the import") and nothing was created. The new text list now always carries a comment cell in the project's
+  editing language (empty when no comment is given), as it did before v3.44.49, so the import is accepted. The
+  comment and the entry texts still go into the editing language only, and the other languages are left empty.
+
+## v3.44.50 (19-10-2026)
+- **Changed: project and library names may contain non-ASCII characters.** The ASCII-only limit is gone now that
+  tool input is read as UTF-8. Creating a project or saving it under a new name no longer refuses names with
+  characters such as Latvian diacritics or Cyrillic, and the tool descriptions no longer tell clients to use
+  ASCII names.
+
+## v3.44.49 (19-10-2026)
+- **Fixed: update_textlist_comment overwrote the comment in every language of the project.** A text list comment
+  is kept once per project language. The new comment was written into all of them, so every translation was
+  replaced by the one text sent. Now only the comment in the project's editing language is written, every
+  language is read back afterwards, and the reply names the language it wrote, e.g. "(culture de-DE)". If any
+  other language changed, or the new text did not land, the previous texts are written back and read again, and
+  the reply starts with "Error:" and says whether every language was restored (read back) or which language
+  could not be restored and what it now holds. If the editing language cannot be read, nothing is changed.
+- **Fixed: create_textlist / add / update entries wrote the text into the last language column instead of the
+  editing language.** On a project with more than one language, the comment of a new text list and the text of
+  new or updated entries went into whichever language came last in TIA's export, not into the project's editing
+  language. They now go into the editing language only, and the reply names it. If the export has no column for
+  the editing language, or the editing language cannot be read, the call is refused and nothing is changed.
+
+## v3.44.48 (19-10-2026)
+- **DB and interface member comments are written in the project's editing language.** `db add_member` (single and
+  bulk), `db update_member` and the block interface member editor (`add_interface_member`,
+  `update_interface_member`) used to write member comments as English (en-US), and an update changed whichever
+  language came first. They now write the language the project is edited in and keep every other translation as it
+  was. The reply names the language it wrote, e.g. `(culture de-DE)`. If the project's editing language cannot be
+  read, the call is refused before anything is changed.
+- **Clearing a member comment keeps the other translations.** `newComment=""` used to delete the comment in every
+  language. It now clears only the editing language; the comment is removed completely only when no other language
+  still has text.
+- **DB member views show the editing language.** `db get_member` and `db get_structure` show member and DB comments
+  in the project's editing language. When that language has no text, the first language that has text is shown,
+  labelled with its language (e.g. `[en-US] Motor speed`). `db get_structure` no longer runs every translation of a
+  member comment together into one string, and shows each member's own comment rather than the first comment found
+  inside it.
+
+## v3.44.47 (19-10-2026)
+- **Fixed: non-ASCII tool arguments (e.g. Polish/Latvian letters) arrived garbled on Windows with a non-UTF-8 code
+  page (gh#16).** A name or comment such as `Janis Berzins` written with its accents reached the project as
+  unreadable characters when the machine's console code page was not UTF-8. TiaCommander now reads every request
+  as UTF-8 regardless of the code page, on the direct connection and when a second client shares the running
+  instance. A request that starts with a UTF-8 byte-order mark is accepted. Requests to the live-data component are
+  also sent as UTF-8.
+
+## v3.44.46 (19-10-2026)
+- **Internal: one shared way to read and write texts in a chosen project language.** No change in behaviour.
+  Tag comments, UDT member comments and the IDs of new XML elements are now handled by one set of helpers that
+  write a single language and leave every other language as it was. Reading a tag comment or a UDT member
+  comment still returns the text in the project's editing language, else the first language that has text, as
+  before. This prepares the coming fixes for comments and titles written in the wrong language.
+
+## v3.44.45 (19-10-2026)
+- **Fixed: text-list create / entry edits / import were undone on projects with more than one language.** On a
+  project with more than one active language, TIA writes the text "<No value>" into every comment or text cell
+  of the exported text lists that has no text. The check that runs after create_textlist, add_entries,
+  update_entries, delete_entries and import_textlists compared that against the empty text it expected, saw a
+  difference, put the text lists back and replied with "Error: ... was NOT applied". A cell that holds exactly
+  "<No value>" now counts as empty, on both sides of the check and when the text lists are put back after a
+  failed edit. Any other text is still compared exactly: a text that did not land is still a failed edit, and
+  "<No value>" as part of a longer text is kept as written.
+
+## v3.44.44 (18-10-2026)
+- **Changed: watch and force table entry replies show the entry as TIA stored it.** TIA stores some values in its
+  own spelling: an absolute address in upper case (%mw2752 is stored as %MW2752), TRUE and FALSE in upper case (a
+  force or modify value sent as true is stored as TRUE), and a DB member written without quotes with the DB name
+  quoted (NonOptimised.test1 is stored as "NonOptimised".test1). An add_entry is verified against the stored
+  table and keeps these forms - the entry is added, the reply says "verified", and it shows the stored address,
+  modifyValue and forceValue. Only these spelling differences are accepted: a different address, a different
+  value (16#ff is not 16#FF, true is not 1) or a different tag name case is still treated as a failed edit, and
+  the table is put back from its copy.
+- **Changed: update_entry refuses an empty displayFormat.** TIA does not accept an entry with an empty display
+  format, so update_entry with displayFormat "" (or only spaces) is now refused before anything is written, and
+  the reply says "NO changes were applied" and lists the valid display formats. Leave displayFormat out to keep
+  the entry's stored format. add_entry without a displayFormat still uses Hex.
+
+## v3.44.43 (18-10-2026)
+- **Fixed: adding, updating or deleting a watch or force table entry, and clear_table, could leave the table
+  replaced with no copy to go back to.** Each of these edits now exports the table first; if that copy cannot be
+  taken, the edit is refused and the reply says "no backup could be taken ... NO changes were applied". After the
+  edit the table is read back and compared row by row with what it should now hold: every row that was there
+  before, with only this call's change applied (two rows with the same address are both kept and checked). The
+  row check accepts the same stored forms as watch import_table (a tag name written without quotes is stored with
+  quotes, an absolute address that belongs to exactly one tag is stored as that tag's name, the display format
+  Date is stored as DATE_AND_TIME). The reply says "verified" only when the table holds exactly the expected rows.
+  When it does not, the table is put back from the copy, checked again, and the reply starts with "Error:" and
+  says the table was RESTORED; if even that fails, it says the table could NOT be restored and names the copy
+  ("Backup KEPT at: <path>").
+- **Changed: a display format that TIA replaces is named in every add_entry and update_entry reply.** When the
+  display format you send does not suit the address's data type, TIA stores another one (for example Float on a
+  single bit is stored as Bool, Bool on a word as Hex). This is still accepted for the entry the call writes, and
+  the reply now says so in one place: "displayFormat: stored 'Bool' (SENT 'Float' - TIA's documented fallback for
+  the target's type)", and its "verified" part reads "(display format excepted, see above)". update_entry, which
+  did not mention it before, now names it too (an empty displayFormat is refused - see v3.44.44). A
+  format change on any other row of the table is not accepted: the edit is undone as described above. Choose the
+  display format that matches the address's data type to have it stored as sent.
+
+## v3.44.42 (18-10-2026)
+- **Internal: test hook for watch and force table entry edits.** No change in behaviour. A test-only switch
+  lets the test build fail an entry add, update, delete or a clear_table right after the table was written,
+  so the next release can be checked against what such an edit leaves behind when it fails at that point.
+  The switch is off in every normal installation.
+
+## v3.44.41 (18-10-2026)
+- **Fixed: a failed text-list write could leave the text lists changed, with no copy to go back to.**
+  alarm_text create_textlist, add_entries, delete_entries, update_entries and import_textlists
+  now export every text list of the device before they write, read every list back afterwards
+  and compare it with what was asked: the list name, range and comment, and for every entry
+  From, To and the text in every language. A list the file names but carries no entries for
+  keeps its entries. The reply says "verified" only when the lists the write names hold the
+  change and every other list is unchanged. When the write did not land as asked, every text
+  list is put back from that copy and checked again, and the reply starts with "Error:" and says
+  the lists were RESTORED. If even that fails, the reply says the lists could NOT be restored and
+  names the file that holds the copy ("Backup KEPT at: <path>") and the other files of that write
+  it kept.
+- **Fixed: an import whose state was not OK was not reported as an error.** A text-list write
+  whose import ends in a warning or error state is now a failed write: the lists are restored as
+  above and the reply starts with "Error:" (import_textlists still names the import state, the
+  file and the import log).
+- **Changed: a text-list write is refused when no complete copy can be taken.** The copy of every
+  text list must come back from TIA without a warning or error and must hold every user text list
+  of the device; otherwise nothing is written and the reply starts with "Error:". An undo removes
+  only lists the failed write added.
+- **Changed: a text-list write that changes a system text list the copy does not hold is refused.**
+  Such a change could neither be checked nor undone, so nothing is written and the reply starts
+  with "Error:".
+- **Changed: alarm_text delete_entries refuses to remove every entry of a text list.** A text-list
+  import leaves a list without entries in the file unchanged, so that request could never land; it
+  is now refused before anything is written (the reply starts with "Error:"). Keep at least one
+  entry, or use delete_textlist.
+- import_textlists says in its reply what it checked: with overwrite=true every list the file
+  names carries the file's definitions and entries and every other list is unchanged; with
+  overwrite=false every new list carries the file's definitions and entries and every existing
+  list is unchanged. create_textlist on a device with no user text list names the helper list it
+  imported if that list could not be removed afterwards.
+
+## v3.44.40 (18-10-2026)
+- **Fixed: technology object writes that had no effect were reported as warnings, not errors.**
+  technology_objects rename, delete and export now reply "Error: ..." when the read-back shows
+  the action did not happen (the name is unchanged, the object is still listed, no file was
+  written). Before, these replies started with "WARNING:" and were counted as successful calls.
+  A rename that landed under a different name, or whose result cannot be read back, is also
+  reported as an error and says so.
+- **Fixed: technology_objects set_parameter replies now match what the read-back shows.** A
+  value that was accepted but not applied replies "Error: ... the write was accepted and
+  discarded"; a write whose result cannot be read back replies "Error: ... NOT verified"; a
+  value that ends up different from the one requested is an error too. Writing the value the
+  parameter already holds is a success: "... unchanged (already <value>)".
+- **Fixed: technology_objects import of a file that creates nothing looked like a success.** It
+  now replies "Error: technology_objects import of '<file>' imported no objects." instead of
+  "Imported 0 technology object(s)".
+- **Fixed: export_all_xml led with success lines when some blocks failed.** If any block cannot
+  be exported, the reply now starts with "Error: export_all partially failed - <n> of <m> blocks
+  exported", lists the failed blocks first, then the exported ones. When an export produced no
+  file, the reply says the existing file was not changed only if there was one.
+- **Fixed: library delete_unused_types could report invented counts.** If the check after the
+  cleanup fails, the reply now starts with "Error: library cleanup ran but the result could not
+  be reconciled (<reason>) - removed/remaining counts unknown" and lists every error the check
+  collected. Before, it listed a made-up "still present" entry and computed removed/remaining
+  counts from it.
+
+## v3.44.39 (18-10-2026)
+- **Internal: test hooks for technology object and library cleanup replies.** No change in
+  behaviour. Test-only switches let the test build make a technology object delete, export or
+  parameter write have no effect (or make its read-back fail), and make the library cleanup
+  check fail, so the next release can be checked against the replies those cases produce. The
+  switches are off in every normal installation.
+
+## v3.44.38 (18-10-2026)
+- **Internal: test hook for text-list writes.** No change in behaviour. A test-only switch
+  lets the test build fail a text-list write (create_textlist, add_entries, delete_entries,
+  update_entries and import_textlists) right after the new text lists were imported, so the
+  next release can be checked against what such a write leaves behind when it fails at that
+  point. The switch is off in every normal installation.
+
+## v3.44.37 (18-10-2026)
+- **Fixed: watch import_table with overwrite=true could replace a watch table with no copy to go back to.**
+  The table is now exported first. If that copy cannot be taken or read back, the import is refused and the
+  reply says "no backup could be taken ... NO changes were applied". After the import the table is read back
+  and compared with the file, row by row (address, display format, modify value, triggers, force value and
+  the comment in every language; two rows with the same address are both kept). The row check accepts the
+  forms in which TIA stores an entry: a tag name written without quotes (Clock_1Hz) is stored with quotes
+  ("Clock_1Hz"), an absolute address that belongs to exactly one tag (%M60.0) is stored as that tag's name,
+  and the display format Date is stored as DATE_AND_TIME. An address that two tags share, or that no tag
+  owns, is compared exactly as written. The reply says "verified" only when the table holds exactly the
+  file's rows. When it does not, the table is put back from the copy, checked again, and the reply starts
+  with "Error:" and says the table was RESTORED; if even that fails, it says the table could NOT be restored
+  and names the copy ("Backup KEPT at: <path>").
+- **Changed: watch import_table takes exactly one watch table per call.** A file holding several tables
+  (or a force table) is refused before anything is written; so is a table name that matches more than one
+  table, a table name that belongs to a force table, and overwrite=false for a table that already exists.
+  A new table is still created at the top of the watch tables tree, and its rows are checked the same way.
+- **Fixed: tag import_table with overwrite=true could run without a backup.** When the copy of the existing
+  table cannot be taken or read back, the import is now refused before anything is written ("no backup
+  could be taken ... NO changes were applied") instead of running with the problem noted only in the server
+  log. When the import fails, or the table cannot be found afterwards, the table is put back from the copy
+  and the reply says RESTORED only after the restored table was read back and matched the copy; otherwise
+  it names the copy ("Backup KEPT at: <path>"). An unused copy is no longer left in the temp folder.
+- **Changed: when watch import_table or tag import_table stops on an unexpected error, the reply says what
+  happened to the project** - nothing changed, a new table of that name now exists (or does not), or an
+  import had started (and, for a tag table, where the copy of the table is kept).
+
+## v3.44.36 (18-10-2026)
+- **Fixed: session save_as saved the original project first.** save_as used to save the open
+  project before writing the copy, so unsaved changes ended up in the original as well. save_as
+  now writes only the copy: your unsaved changes go into the copy, and the original project's
+  data stays as it was on disk. The reply names the project that is open afterwards (the copy)
+  and says "original project data unchanged". TIA still removes its own session files (such as
+  the lock and index files) from the original folder, as it does whenever a project is closed.
+
+## v3.44.35 (18-10-2026)
+- **Internal: test hooks for watch and tag table imports.** No change in behaviour. A test-only switch
+  lets the test build fail a watch import_table or a tag import_table right after the table was
+  written, so the next release can be checked against what an import leaves behind when it fails
+  at that point. The switch is off in every normal installation.
+
+## v3.44.34 (18-10-2026)
+- **Fixed: udt export_xml replaced an existing file without being asked.** With an outputPath that
+  already exists, export_xml now refuses ("... already exists - pass overwrite=true to replace it.
+  NO changes were applied.") unless you pass the new overwrite=true. Default: false.
+- **Fixed: a failed export could delete the file it was meant to replace.** udt export_xml,
+  library export_type_xml and blocks_read export_all_xml now write each export to a temporary
+  file next to the target ("<name>.tmp-<8 hex>.xml"), check that it exists and is not empty, and
+  only then swap it in. If the export fails, the existing file stays exactly as it was and the
+  temporary file is removed. export_all_xml now also replaces an existing block file in the
+  output folder instead of failing on it.
+- **Fixed: export_all_xml could report success lines first when it stopped part-way.** If the
+  whole export stops, the reply now starts with "Error:" and gives how many blocks had been
+  exported and how many had failed.
+
+## v3.44.33 (18-10-2026)
+- **Internal: test hook for exports.** No change in behaviour. A test-only switch lets the
+  test build fail a library type export and an export_all block export right after the
+  export call returned, so the next release can be checked against what an export leaves
+  behind when it fails at that point. The switch is off in every normal installation.
+
+## v3.44.32 (18-10-2026)
+- **Fixed: a failed DB member edit could leave the DB changed, with no copy to go back to.**
+  db add_member, delete_member, update_member, update_member_comment and set_start_value
+  (single and bulk) now keep a copy of the DB taken before the edit, read the DB back after
+  the edit and compile it. The reply ends with "(verified: compiled)" only when the DB holds
+  exactly the requested change and every other member is unchanged (names, data types, start
+  values including array elements, retain setting, access flags and the comment in every
+  language). When the edit did not land as requested, the DB is put back from that copy,
+  checked again, and the reply starts with "Error:" and says the DB was RESTORED. If even
+  that fails, the reply says the DB could NOT be restored and names the file that holds the
+  copy ("Backup KEPT at: <path>"). A know-how protected DB is refused before anything is
+  written. set_start_value no longer tells you to compile to verify. A line break in a member
+  comment is now stored as a space - TIA keeps a member comment on one line - and the reply says so.
+
+## v3.44.31 (18-10-2026)
+- **Internal: test hook for DB member edits.** No change in behaviour. A test-only switch
+  lets the test build fail a db member edit right after the new DB content was written, so
+  the next release can be checked against what an edit leaves behind when it fails at that
+  point. The switch is off in every normal installation.
+
+## v3.44.30 (18-10-2026)
+- **Internal: test hook for the save_as investigation.** No change in behaviour. A test-only
+  switch lets the test build run save_as without first saving the original project, so the
+  next release can be checked before save_as stops saving the original. The switch is off in
+  every normal installation.
+
+## v3.44.29 (18-10-2026)
+- **Fixed: udt add_member refused new members as "already exists".** A name such as
+  SetPoint or None, or the name of a member inside a Struct, was refused by add_member
+  although the UDT had no top-level member of that name, and the single and the bulk
+  add_member could disagree about it. Both now refuse only a name that a top-level member
+  already uses; the refusal still says "already exists".
+
+## v3.44.28 (18-10-2026)
+- **Fixed: udt get_structure missed or flattened nested members.** For a UDT with Struct
+  members, get_structure left out members inside a Struct or listed them as if they were
+  top-level members, could show a child's comment on its Struct, and printed a wrong member
+  count. Nested members are now listed under their Struct by path (for example
+  "1.1 AxisX.Home : Real"), each comment is shown on the member that owns it, in the
+  project's editing language, and the summary reads
+  "Total members: <n> top-level (<m> declared)". Members that come from a UDT type used
+  inside the UDT are not listed one by one.
+
+## v3.44.27 (17-10-2026)
+- **Fixed: a UDT with Struct members could not be edited.** Editing any member of a UDT
+  that holds a Struct (or an Array of Struct) was refused by TIA, because the rebuilt type
+  lost its nesting. The rebuild now keeps every Struct with its members, so such a UDT can
+  be edited like any other.
+- **Fixed: a start value could land on the wrong member.** A Struct member could take the
+  start value of one of its own members. A Struct member now keeps only its own start value.
+- **Array element start values are kept.** The start values of single array elements (for
+  example Arr[0] := 7), in an array or in an Array of Struct, now survive an edit of any other
+  member. If they cannot be put back, the edit is undone and the reply says why.
+- **Fixed: a '|' or a line break in a member comment changed the UDT.** A comment such as
+  "range 0|100" turned its second half into a start value, and a line break could add a
+  member nobody asked for. Comments are now stored exactly as given (line breaks and other
+  control characters become spaces in the generated source only), in udt create, add_member
+  and update_member_comment alike.
+- **Nested members can be addressed by their path.** delete_member, update_member_comment
+  and update_member accept a dotted path such as AxisX.Home. A top-level member with that
+  exact name is matched first; a bare name with no top-level match picks the single nested
+  member of that name; a name that matches several nested members is refused and the reply
+  lists their paths. A path that two members share (possible when a member name itself
+  contains a '.'), or a dotted path through such a member, is refused and the reply shows
+  the members involved. In a bulk delete_member every name is checked against the UDT as it
+  was before the call, so an ambiguous name is reported instead of silently picking the
+  remaining match. add_member still adds top-level members only.
+- **Safer member input.** A member name with a line break, ';' or '"', or a dataType with a
+  line break, ';', '//' or '(*' that is not an inline 'Struct ... END_STRUCT' block, is
+  refused before anything changes ("NO changes were applied"). So is a start value with a
+  line break, or with ';', '//' or '(*' outside a quoted string. Quoted strings may use the
+  '$' escape ('It$'s'). Inline Struct dataTypes keep working as before.
+- **Changed: a bulk delete_member that would empty the UDT (or a Struct in it) is refused
+  as a whole** before anything changes, instead of deleting the other members.
+
+## v3.44.26 (17-10-2026)
+- **Fixed: a UDT member edit lost the comments of other languages.** In a project with
+  more than one language, editing one member (comment, type, start value, add or delete)
+  kept only one language of every member's comment and could overwrite the editing
+  language with another language's text. Every language of every member is now carried
+  over, the caller's comment goes into the project's editing language exactly as given
+  (after line breaks become spaces), and the result is read back: if a comment did not
+  land, the edit is rolled back and the reply names it. A comment inside a member whose
+  type the edit changed is not copied onto the new type. When the editing language cannot
+  be read, the reply says where the caller's text was written ("NOTE: editing language
+  unreadable - comments carried for every culture, caller text written to <culture>").
+
+## v3.44.25 (17-10-2026)
+- **Fixed: a tag comment write could damage the tag table with no way back.** add_tag (with a
+  comment, including bulk add_tag) and tag update_comment replace the whole tag table to set one comment. They now
+  save a copy of the table first and check the table afterwards: the comment must be there
+  and every other tag (comments in every language, addresses, access settings) must be
+  unchanged. If the write or the check fails, the table is put back from the copy and the
+  reply says so. If even that fails, the reply says the table could not be restored and names
+  the file that holds the copy. When nothing was written (for example a comment with a
+  character TIA cannot store), update_comment says no changes were applied; add_tag says the
+  tag was created but its comment was not.
+
+## v3.44.24 (17-10-2026)
+- **Fixed: a UDT member edit could move an attribute to the wrong member.** When two
+  members had the same name at different depths (for example AxisX.Home and AxisY.Home),
+  one of them lost its ExternalVisible / ExternalWritable / ExternalAccessible / SetPoint
+  value, and a value could be copied onto a member at another depth. Every value now goes
+  back to exactly the member it came from, a start value set on a member inside a
+  UDT-typed member is kept too, and the edit is read back: if a value did not land, the
+  edit is rolled back and the reply names it ("AxisX.Home.SetPoint expected true, read false").
+- **Fixed: create_block overwrite could reset member and block attributes and still report
+  success.** The block is now exported before it is replaced. If the attributes cannot be
+  carried over and read back, the whole overwrite is rolled back from that export and the
+  reply says "ROLLED BACK"; if even that fails, the reply says so and names the kept
+  export. When the export cannot be taken (an inconsistent block), the overwrite still runs
+  and the reply opens with "WARNING: no backup could be taken - no rollback possible".
+  A failed overwrite that changed the block names the kept export ("Pre-overwrite export
+  KEPT at: ...").
+
+## v3.44.23 (17-10-2026)
+- Internal: test support for an upcoming fix to tag comment writes. No change in behaviour.
+
+## v3.44.22 (17-10-2026)
+- Internal: test support for upcoming fixes to create_block overwrite. No change in behaviour.
+
+## v3.44.21 (17-10-2026)
+- **Fixed: the force table export left the TagComment column empty.** Force table entries
+  are stored with peripheral access ("tag":P), and the export did not match that name to
+  its tag, so no row ever showed the tag's comment. The export now matches it.
+
+## v3.44.20 (17-10-2026)
+- **Fixed: tag comments were read wrongly.** get_table_details, tag search, the watch and
+  force table exports and export_io_map showed a tag's comment under the wrong name or not
+  at all: a comment could appear on a tag named like its table, a tag whose name contains
+  '&' lost its comment, and '&', '<' and '>' in a comment were shown escaped ('&amp;').
+  All five now read the same way: the comment of each tag, under its real name, with the
+  text as typed. User constants are never shown as tag comments.
+- **Fixed: tag comments were shown in the wrong language.** In a project whose editing
+  language is not English, the readers showed the English comment. They now show the
+  comment in the project's editing language, and fall back to the first language that has
+  a comment only when that one is empty.
+
+## v3.44.19 (17-10-2026)
+- **Fixed: a UDT member edit could report success while it lost data or changed nothing.**
+  add_member, delete_member, update_member_comment, update_member and the bulk modes now
+  take a backup of the UDT first, compile the rebuilt type, read it back and compare it
+  with the edit that was asked for. Only then does the reply say success, and it says
+  where the type is: "(verified: compiled, at 'Folder/')". If anything does not match, the
+  original UDT is restored from the backup and the reply says so ("was NOT applied ...
+  RESTORED from the pre-edit backup"). If TIA refuses the generated source, its error text
+  is quoted in full and the reply says NO changes were applied.
+- **Fixed: member attributes were lost on a UDT in a folder.** ExternalVisible,
+  ExternalWritable, ExternalAccessible and SetPoint were silently reset by an edit of a UDT
+  that sits in a folder. They are now carried back into the UDT's own folder; if that
+  fails, the edit is rolled back instead of reporting success.
+- **Fixed: `udt create` with members and targetFolder put the UDT at the container root.**
+  The new type is now compiled before it is moved, so it lands in the requested folder. If
+  it cannot be placed there, or does not verify, it is removed and the reply says why; the
+  generated external source is kept so the errors can be read.
+- A UDT member comment with line breaks is stored on one line (TIA keeps a member comment
+  on one line); each line break becomes a space and the reply says so.
+- Bulk delete_member no longer re-adds the last member as a Bool when every member was
+  named; that member is reported as not deleted and is left unchanged.
+- Known limit until a later release: a UDT with Struct members, or with comments in more
+  than one language, cannot be edited yet - the edit is refused with the original intact.
+
+## v3.44.18 (17-10-2026)
+- **Fixed: a tag comment could land on the wrong tag.** tag update_comment and add_tag
+  wrote the comment to the first tag of the table when a tag had the same name as its
+  table, and could not comment a tag whose name contains '&' ("could not find tag").
+  The comment now always lands on the named tag, and every other tag is left as it was.
+- **Fixed: tag comments were written in the wrong language.** In a project whose editing
+  language is not English, update_comment and add_tag overwrote the English comment.
+  The comment now goes into the project's editing language; the other languages are kept.
+- Tag comments with line breaks are stored on one line (TIA keeps a tag comment on one
+  line); each line break becomes a space and the reply says so.
+- A tag comment TIA cannot store (for example a control character) is refused before
+  anything is imported; update_comment then says NO changes were applied.
+
+## v3.44.17 (17-10-2026)
+- Internal: test support for upcoming fixes to UDT member edits. No change in behaviour.
+
+## v3.44.16 (17-10-2026)
+- Internal: test support for upcoming fixes to UDT member edits. No change in behaviour.
+
+## v3.44.15 (17-10-2026)
+- Internal: groundwork for upcoming fixes to UDT member edits and tag comments. No change in behaviour.
+
+## v3.44.14 (16-10-2026)
+- **Fixed: LAD and FBD OBs could not be created on some S7-1200 CPUs.** create_ob with
+  language=LAD or FBD failed with TIA's "Section 'Input' is not valid for this block"
+  (measured on an S7-1200 FW V3.0; after the fix create_ob LAD / FBD / SCL, also as OB30
+  CyclicInterrupt, all land there; the create_block LAD/FBD OB route is guarded by the
+  same retry). When TIA gives exactly that answer, the
+  OB's Input section (Initial_Call / Remanence) is now removed and the import is retried
+  once; the reply notes that the section was dropped. CPUs that accept the section, such
+  as the S7-1500, still get it. If the retry fails too, the reply shows TIA's message and
+  nothing is left behind.
+
+## v3.44.13 (16-10-2026)
+- **Fixed: OB numbers TIA accepts were refused.** create_block refused every OB number
+  from 2 to 122 ("reserved for system OBs"), although TIA accepts for example OB30/OB31
+  as cyclic interrupts or OB100 as startup. That rule is gone: the number is sent to TIA
+  together with the OB type, and TIA decides. When TIA refuses, the reply names the OB
+  number, the type, the device and TIA's own message, and nothing is left behind.
+  Without a number, OBs are still numbered from 123 upward. When TIA rejects an OB import
+  over its AutoNumber setting (as it does for time-error and diagnostic-error OBs), the
+  import is retried once without that setting. When an OB's own code does not compile,
+  the reply says so and shows the compile messages instead of blaming the number.
+- **Fixed: create_ob ignored obNumber and the OB type.** create_ob obNumber=30 created
+  OB123 and reported success. create_ob now honours obNumber, accepts a new secondaryType
+  argument (for example CyclicInterrupt), and its reply states the number and type the
+  OB really has. create_fb / create_fc also honour fbNumber / fcNumber on the default
+  SCL route.
+- **Fixed: rename_block with an invalid newNumber renamed the block anyway.** newNumber is
+  now checked before anything changes, and a number TIA refuses is reported as an error
+  that says whether the rename itself was applied.
+
+## v3.44.12 (15-10-2026)
+- **Fixed: the multi-client confirmation phrase could authorise deleting a folder's
+  contents.** delete_folder with deleteContents=true accepted any text containing
+  "I understand", including the phrase used to confirm actions while several AI clients
+  are connected. Deleting a non-empty folder now needs the exact phrase
+  "I understand this deletes the folder contents"; deleting a tag that has a comment or
+  access flags needs "I understand this destroys the comment and access flags". Other
+  confirmation checks no longer accept the multi-client phrase either.
+
+## v3.44.11 (15-10-2026)
+- **Fixed: publishing to a library with onCollision=replace could lose the existing master
+  copy.** The old copy was deleted first, so a failed publish left none. Now the old copy is
+  kept under a temporary name until the new one is created and checked, and is put back if
+  anything fails.
+- **Fixed: a folder-qualified block or UDT name (e.g. "Motors/Valve") did not detect an
+  existing master copy.** replace silently created a second copy named "<name>_1", and
+  onCollision=fail did not refuse. Both now match the existing copy by its real name.
+
+## v3.44.10 (15-10-2026)
+- Internal: test instrumentation for an upcoming library publish (replace) safety fix. No change in behaviour.
+
+## v3.44.9 (15-10-2026)
+- **Fixed: moving a tag to another tag table could lose it.** If adding the tag to the target
+  table failed after it had been removed from the source, the tag ended up in neither table.
+  Now the source table is backed up first, the moved tag is checked in the target (type,
+  address, comment, access flags), and any failure restores the source table from the backup.
+
+## v3.44.8 (15-10-2026)
+- Internal: test instrumentation for an upcoming tag-move safety fix. No change in behaviour.
+
+## v3.44.7 (15-10-2026)
+- **Fixed: moving a UDT, tag table or watch table between folders could lose it.** If the
+  move failed after the original was removed, the restore could fail too and the item was
+  gone. Now the target folder is tested with a temporary copy first (UDTs and watch tables),
+  and a move that fails at the last step restores the original from an untouched backup.
+  A moved UDT is also compiled, so it can be exported again right away.
+
+## v3.44.6 (15-10-2026)
+- Internal: test instrumentation for an upcoming folder-move safety fix (UDTs, tag tables, watch tables). No change in behaviour.
+
+## v3.44.5 (14-10-2026)
+- **Fixed: moving a block could lose it.** A know-how protected block was deleted and could
+  not be brought back, and a move whose import failed could leave the block missing. Now a
+  protected block is refused before anything changes (move it in the TIA Portal UI instead),
+  the target folder is tested with a temporary copy before the original is touched, and a
+  move that fails at the last step restores the original block from an untouched backup.
+
+## v3.44.4 (14-10-2026)
+- Internal: test instrumentation for an upcoming block-move safety fix. No change in behaviour.
+
+## v3.44.3 (14-10-2026)
+- **Fixed: overwriting an SCL block with code that does not compile replaced the working
+  block.** The tool reported success while the original code was gone, and an overwrite
+  that asked for a block number already in use could silently change the number. Now, when
+  the new code does not compile (or the number cannot be applied), the original block is
+  restored with its original number and the reply is an error that lists the compiler
+  messages. Creating a NEW block with code that does not compile still works as before.
+- **Fixed: a failed SCL block creation could leave an empty block reported as success.**
+  The silent fallback is gone; the real generation error is returned instead.
+
+## v3.44.2 (14-10-2026)
+- **Fixed: a failed block import could lose the original block.** When an overwrite import
+  failed partway (or the imported block did not verify), the original was not always put
+  back, and the backup copy could be removed even though the reply said it was kept. The
+  original is now restored whenever a backup exists, the backup is only removed after a
+  verified result, and a failed import is reported as an error that states exactly what
+  is left.
+
+## v3.44.1 (14-10-2026)
+- Internal: test instrumentation for upcoming data-safety fixes. No change in behaviour.
+
+## v3.44.0 (20-09-2026)
+- **The tool surface follows your licence live.** When your licence changes (you
+  re-validate or log out in the Manager, or your account's plan changes), the available
+  tools update in the SAME session -- no client restart. A licence losing access drops
+  the affected tools immediately.
+- **Logout button in the Manager.** Next to Re-validate: confirms, wipes the licence data
+  on this machine, and returns to the registration screen so a different user can activate.
+  The seat itself is not released server-side in this version.
+- **Fixed: the registration screen could come up blank.** After a licence wipe (revoked
+  licence, or the new Logout) the License tab showed an empty page instead of the
+  registration form. It now always shows the form.
+- Internal diagnostics improvements for the beta-tester program.
+
+## v3.43.0 (20-09-2026)
+- **The tools now reload without restarting your AI client when a stale licence refreshes.**
+  Before, if TiaCommander started with an expired local licence cache (the common case -- a
+  fresh session after the 72-hour cache lapses), you had to open the Manager, re-validate, AND
+  fully restart Claude Desktop / your client before the tools came back. Re-validating in the
+  Manager alone did not bring them back. Now the server re-checks the licence with the licence
+  API on the first 'get_info', and if it is valid it reloads the full tool set in the SAME
+  session automatically -- no Manager step, no restart.
+- **A call made while unlicensed now says the tools are reloading, not "restart your client".**
+  If the client asks for a licensed tool during a refresh, it gets a "refreshing the licence --
+  the tools will reload in a moment, please retry shortly" message. The retry succeeds once the
+  notification has reloaded the surface.
+- Under the hood: one shared, testable licence-validation core reused by the Manager's
+  re-validate and activate paths and by the new server-side self-heal; the heal is
+  single-flight with a cooldown (it never hammers the licence API) and never blocks tool calls;
+  the licence state transition is synchronised so the reload always sees the licensed state.
+- No change to any tool's behaviour or arguments. Deployment is a separate operator step.
+
 ## v3.42.0 (07-09-2026)
 - **Compiler results now list only real diagnostics.** TIA propagates an error flag up the
   whole tree with empty text on every intermediate level, and the tools used to print all of
@@ -586,7 +1470,7 @@ All notable changes to TiaCommander are documented here.
 - Improved: the live read is bounded to 3 seconds. If it times out, errors, or returns a value this firmware support does not model, the output falls back to the last logged mode change AND says which of those three happened, labelled "last known". A fallback is never presented as a live reading.
 - Fixed: a state that could not be read now renders UNKNOWN, never STOP. About 4% of these reads fail, and failures cluster around mode changes, so the moment a false STOP was most likely was also the moment it misled worst.
 - Fixed: a read that exceeds its budget no longer leaves the connection able to corrupt the next call. The session is discarded rather than reused.
-- Note: there is still no subscription and no push. A live subscription was measured to be incompatible with ordinary reads on the same connection, so it is not offered. See agents/research/findings/223-subpump-spike.md.
+- Note: there is still no subscription and no push. A live subscription was measured to be incompatible with ordinary reads on the same connection, so it is not offered.
 
 ## v3.13.0 (31-07-2026)
 - New: data blocks can now be created directly inside a folder. db action=create takes targetFolder ('Motors/Drives' syntax) and createParents, matching how blocks, tag tables and watch tables already work. The server always accepted these; they were simply never declared, so a client that validates arguments could not send them.
@@ -647,7 +1531,7 @@ All notable changes to TiaCommander are documented here.
 - Docs corrected: the tool tables in both READMEs understated the surface. They now read 18 tools and 209 actions (previously 16 tools, and three different action counts across the two files), and the diagnostics section lists its actual actions.
 
 ## v3.5.0 (28-07-2026)
-- New: admin get_activity_log -- a timeline of every tool call the server made, newest first, with time, tool, action, device, duration, success and error. Optional "since" and "limit". It records only what TiaCommander did; actions you perform by hand in TIA Portal are not visible to any interface and do not appear.
+- New: an internal activity timeline of every tool call the server made, newest first, with time, tool, action, device, duration, success and error. It records only what TiaCommander did; actions you perform by hand in TIA Portal are not visible to any interface and do not appear.
 - Live PLC connections are now diagnosable. The S7 bridge previously failed in silence: nothing it did was written anywhere. It now reports when it starts, what was asked and what came back, how long the round trip took, and -- when it stops -- whether it exited on its own or crashed. A failure that used to read as an unexplained timeout now says which step failed.
 - Fixed: a long-standing condition that could make the bridge freeze if it produced a burst of output. Its error channel was being filled but never emptied.
 - Fixed: log lines could be silently lost when several AI clients ran at once, because every process wrote to one shared file and the loser of a collision was discarded. Each process now writes its own daily log. Existing cleanup and the 14-day retention are unchanged.
@@ -676,7 +1560,7 @@ All notable changes to TiaCommander are documented here.
 - Fixed: log lines could be silently lost when more than one part of the program logged at the same moment.
 
 ## v3.1.0 (27-07-2026)
-- Groundwork for running several AI clients against TiaCommander at once (first phase; not yet user-visible). Internal transport spike proven and the response path refactored behind a per-client output abstraction, with no change to how the current single client is served -- verified byte-for-byte identical.
+- Groundwork for running several AI clients against TiaCommander at once (first phase; not yet user-visible). Internal transport proven and the response path refactored behind a per-client output abstraction, with no change to how the current single client is served -- verified byte-for-byte identical.
 - A second server instance that cannot serve now exits with a distinct, non-zero status and records which instance is holding the connection, instead of exiting silently with no message. This makes the "second client sees no tools and no error" situation diagnosable.
 
 ## v3.0.1 (27-07-2026)

@@ -172,6 +172,21 @@ If you lost your license key, enter your email in the registration
 form and click **Resend Key**. The key will be sent to the email
 address associated with your account.
 
+### Logout / switching users
+
+The **Logout** button (next to Re-validate on the License tab) removes
+the licence data stored on this machine and returns to the registration
+screen, so a different user can register and activate — useful on a
+shared engineering PC. A confirmation dialog is shown first.
+
+Two things to know:
+
+- Logout is local only: the seat stays assigned to the previous user
+  on the licence server until it is activated elsewhere.
+- Any AI clients connected at the time lose the licensed tools on
+  their next status check; after the new user activates, the tools
+  come back in the same session — no client restart needed.
+
 ---
 
 ## Architecture: How It Works

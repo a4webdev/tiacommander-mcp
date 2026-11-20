@@ -179,7 +179,10 @@ access flags, which deleting and re-adding does not.
 
 A **brand-new** UDT is created at the root of PLC data types. Create it
 first, then move it into its folder with the udt move action. Member edits
-on a foldered UDT keep it in its folder automatically.
+on a foldered UDT keep it in its folder automatically. A move recompiles the
+data types and blocks that use the moved UDT, so they stay consistent; the
+reply names them, or warns with any that still have compile errors of their
+own (the move itself is kept).
 
 This applies to creating a UDT from scratch. A UDT created **from a library
 type version or a master copy** lands directly in the target folder in a
@@ -243,18 +246,17 @@ not how many members it contains: the engineering API does not expose a
 type's members without a full export. Use the UDT structure action to
 inspect a specific type's members.
 
-## The activity log covers TiaCommander's actions only
+## Activity records cover TiaCommander's actions only
 
-`admin get_activity_log` shows every tool call TiaCommander made — when, which
-tool and action, against which device, how long it took, and whether it
-succeeded.
+TiaCommander's internal records (usage statistics, recent errors) cover the tool
+calls TiaCommander itself made — when, which tool and action, against which
+device, how long it took, and whether it succeeded.
 
-It does **not** show work you do by hand in TIA Portal. Opening a block, editing
+They do **not** show work you do by hand in TIA Portal. Opening a block, editing
 a network, compiling or downloading from the Portal window leaves no entry,
 because TiaCommander was not involved and TIA Portal does not make that history
 available to any external interface.
 
-**What this means in practice:** a project can change between two logged calls
-with nothing in the log to explain it. The activity log is a complete record of
-what the AI assistant did, not a complete record of what happened to the
-project.
+**What this means in practice:** a project can change between two recorded calls
+with nothing in the records to explain it. They are a complete record of what
+the AI assistant did, not a complete record of what happened to the project.
